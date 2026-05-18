@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>云南高考分数查学校 | 你的分数能上什么大学？</title>
+<title>云南高考查学校 | 你的分数能上什么大学？</title>
 <meta name="description" content="输入高考分数，一键查询你能报哪些大学。涵盖全国在滇招生院校录取数据，分冲刺/稳妥/保底三档推荐。">
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -12,11 +12,8 @@ tailwind.config = {
   theme: {
     extend: {
       colors: {
-        primary: '#1a56db',
-        'primary-dark': '#1e40af',
-        'primary-light': '#dbeafe',
-        accent: '#f59e0b',
-        'accent-dark': '#d97706',
+        primary: { DEFAULT: '#2563eb', 50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a' },
+        accent: { DEFAULT: '#f59e0b', 50: '#fffbeb', 600: '#d97706' },
         success: '#059669',
         danger: '#dc2626',
       }
@@ -26,62 +23,62 @@ tailwind.config = {
 </script>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
-body { font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #f8fafc; }
+body { font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif; background: #f9fafb; color: #1f2937; }
 .fade-in { animation: fadeIn 0.4s ease both; }
 @keyframes fadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
 .result-card { transition: all 0.2s; }
-.result-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
-input[type="range"] { -webkit-appearance: none; appearance: none; height: 6px; border-radius: 3px; outline: none; }
-input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; border-radius: 50%; background: #1a56db; cursor: pointer; box-shadow: 0 2px 6px rgba(26,86,219,0.3); }
+.result-card:hover { background: #f9fafb; }
+input[type="range"] { -webkit-appearance: none; appearance: none; height: 5px; border-radius: 3px; outline: none; background: #e5e7eb; }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #2563eb; cursor: pointer; box-shadow: 0 1px 4px rgba(37,99,235,0.3); }
 input[type="number"]::-webkit-inner-spin-button { opacity: 1; }
 </style>
 </head>
 <body>
 
 <!-- ===== NAV ===== -->
-<nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
-  <div class="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
-    <a href="index.html" class="flex items-center gap-2 text-primary font-bold">
-      <i class="fas fa-graduation-cap"></i>
+<nav class="bg-white/95 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
+  <div class="max-w-5xl mx-auto px-5 h-16 flex items-center justify-between">
+    <a href="index.html" class="flex items-center gap-2.5 text-primary font-bold text-lg tracking-tight">
+      <i class="fas fa-graduation-cap text-xl"></i>
       <span>云南高考指南</span>
     </a>
-    <div class="flex items-center gap-3 text-sm">
-      <a href="index.html" class="text-gray-500 hover:text-primary transition-colors">各地州群</a>
-      <span class="text-primary font-semibold border-b-2 border-primary pb-1">查学校</span>
+    <div class="flex items-center gap-6 text-sm">
+      <a href="index.html" class="text-gray-400 hover:text-primary transition-colors">各地州群</a>
+      <span class="text-primary font-semibold border-b-2 border-primary pb-0.5">查学校</span>
     </div>
   </div>
 </nav>
 
 <!-- ===== HERO ===== -->
-<section class="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white py-16 md:py-20">
-  <div class="max-w-3xl mx-auto px-4 text-center">
-    <i class="fas fa-search text-4xl md:text-5xl mb-4 opacity-80"></i>
-    <h1 class="text-3xl md:text-4xl font-extrabold mb-3">你的分数能上什么学校？</h1>
-    <p class="text-lg opacity-90">输入分数 + 科类，一键智能匹配全国在滇招生院校</p>
+<section class="py-16 md:py-20 bg-gradient-to-b from-primary-50/60 via-white to-white">
+  <div class="max-w-3xl mx-auto px-5 text-center">
+    <span class="text-primary font-medium text-xs tracking-widest uppercase">TOOL</span>
+    <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mt-3 tracking-tight">你的分数能上什么学校？</h1>
+    <p class="text-gray-400 mt-3">输入分数 + 科类，一键匹配全国在滇招生院校</p>
   </div>
 </section>
 
 <!-- ===== TOOL ===== -->
-<section class="max-w-3xl mx-auto px-4 -mt-8">
+<section class="max-w-3xl mx-auto px-5 -mt-6">
   <!-- 查询卡片 -->
-  <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8 mb-8 fade-in">
+  <div class="bg-white rounded-2xl border border-gray-100 p-6 md:p-8 mb-8 fade-in shadow-sm">
     <div class="grid md:grid-cols-3 gap-4 mb-6">
       <div>
         <label class="block text-sm font-semibold text-gray-700 mb-2">科类</label>
         <div class="flex gap-2">
-          <button id="btnLiKe" onclick="setSubject('like')" class="flex-1 py-3 px-4 rounded-xl border-2 font-bold text-sm transition-all bg-primary text-white border-primary">理科</button>
-          <button id="btnWenKe" onclick="setSubject('wenke')" class="flex-1 py-3 px-4 rounded-xl border-2 font-bold text-sm transition-all bg-white text-gray-600 border-gray-200">文科</button>
+          <button id="btnLiKe" onclick="setSubject('like')" class="flex-1 py-3 px-4 rounded-xl border-2 font-semibold text-sm transition-all bg-primary text-white border-primary">理科</button>
+          <button id="btnWenKe" onclick="setSubject('wenke')" class="flex-1 py-3 px-4 rounded-xl border-2 font-semibold text-sm transition-all bg-white text-gray-600 border-gray-200">文科</button>
         </div>
       </div>
       <div>
         <label class="block text-sm font-semibold text-gray-700 mb-2">高考分数</label>
         <div class="relative">
-          <input id="scoreInput" type="number" min="0" max="750" value="500" oninput="syncScore(this.value)" class="w-full py-3 px-4 rounded-xl border-2 border-gray-200 font-bold text-xl text-center focus:border-primary focus:ring-2 focus:ring-primary-light outline-none transition-all" style="-moz-appearance:textfield">
+          <input id="scoreInput" type="number" min="0" max="750" value="500" oninput="syncScore(this.value)" class="w-full py-3 px-4 rounded-xl border-2 border-gray-200 font-bold text-xl text-center focus:border-primary focus:ring-2 focus:ring-primary-50 outline-none transition-all" style="-moz-appearance:textfield">
         </div>
       </div>
       <div class="flex items-end">
-        <button onclick="search()" class="w-full py-3 px-6 rounded-xl font-bold text-lg bg-primary text-white hover:bg-primary-dark transition-all shadow-lg shadow-primary/25 active:scale-[0.98]">
-          <i class="fas fa-search mr-2"></i>开始查询
+        <button onclick="search()" class="w-full py-3 px-6 rounded-xl font-semibold text-base bg-primary text-white hover:bg-primary-700 transition-all shadow-sm active:scale-[0.98]">
+          <i class="fas fa-search mr-2"></i>查询
         </button>
       </div>
     </div>
@@ -89,51 +86,51 @@ input[type="number"]::-webkit-inner-spin-button { opacity: 1; }
     <!-- 分数滑块 -->
     <div class="px-1">
       <input type="range" id="scoreSlider" min="0" max="750" value="500" oninput="syncScore(this.value)" class="w-full">
-      <div class="flex justify-between text-xs text-gray-400 mt-1 px-1">
-        <span>0</span><span>一本线<span id="yibenLine" class="font-bold text-primary">505</span></span><span>750</span>
+      <div class="flex justify-between text-xs text-gray-400 mt-1.5 px-1">
+        <span>0</span><span>一本线 <span id="yibenLine" class="font-semibold text-primary">505</span></span><span>750</span>
       </div>
     </div>
 
     <!-- 快捷分数 -->
-    <div class="flex flex-wrap gap-2 mt-4">
-      <span class="text-xs text-gray-500 mr-1 leading-8">快捷选分：</span>
-      <button onclick="quickScore(600)" class="px-3 py-1.5 text-xs rounded-lg border border-gray-200 hover:bg-primary-light hover:border-primary transition-colors">600</button>
-      <button onclick="quickScore(550)" class="px-3 py-1.5 text-xs rounded-lg border border-gray-200 hover:bg-primary-light hover:border-primary transition-colors">550</button>
-      <button onclick="quickScore(500)" class="px-3 py-1.5 text-xs rounded-lg border border-gray-200 hover:bg-primary-light hover:border-primary transition-colors">500</button>
-      <button onclick="quickScore(470)" class="px-3 py-1.5 text-xs rounded-lg border border-gray-200 hover:bg-primary-light hover:border-primary transition-colors">470</button>
-      <button onclick="quickScore(450)" class="px-3 py-1.5 text-xs rounded-lg border border-gray-200 hover:bg-primary-light hover:border-primary transition-colors">450</button>
-      <button onclick="quickScore(420)" class="px-3 py-1.5 text-xs rounded-lg border border-gray-200 hover:bg-primary-light hover:border-primary transition-colors">420</button>
-      <button onclick="quickScore(400)" class="px-3 py-1.5 text-xs rounded-lg border border-gray-200 hover:bg-primary-light hover:border-primary transition-colors">400</button>
-      <button onclick="quickScore(350)" class="px-3 py-1.5 text-xs rounded-lg border border-gray-200 hover:bg-primary-light hover:border-primary transition-colors">350</button>
+    <div class="flex flex-wrap gap-2 mt-5">
+      <span class="text-xs text-gray-400 mr-1 leading-7">快捷选分：</span>
+      <button onclick="quickScore(600)" class="px-3 py-1.5 text-xs rounded-lg border border-gray-200 text-gray-500 hover:border-primary hover:text-primary transition-colors">600</button>
+      <button onclick="quickScore(550)" class="px-3 py-1.5 text-xs rounded-lg border border-gray-200 text-gray-500 hover:border-primary hover:text-primary transition-colors">550</button>
+      <button onclick="quickScore(500)" class="px-3 py-1.5 text-xs rounded-lg border border-gray-200 text-gray-500 hover:border-primary hover:text-primary transition-colors">500</button>
+      <button onclick="quickScore(470)" class="px-3 py-1.5 text-xs rounded-lg border border-gray-200 text-gray-500 hover:border-primary hover:text-primary transition-colors">470</button>
+      <button onclick="quickScore(450)" class="px-3 py-1.5 text-xs rounded-lg border border-gray-200 text-gray-500 hover:border-primary hover:text-primary transition-colors">450</button>
+      <button onclick="quickScore(420)" class="px-3 py-1.5 text-xs rounded-lg border border-gray-200 text-gray-500 hover:border-primary hover:text-primary transition-colors">420</button>
+      <button onclick="quickScore(400)" class="px-3 py-1.5 text-xs rounded-lg border border-gray-200 text-gray-500 hover:border-primary hover:text-primary transition-colors">400</button>
+      <button onclick="quickScore(350)" class="px-3 py-1.5 text-xs rounded-lg border border-gray-200 text-gray-500 hover:border-primary hover:text-primary transition-colors">350</button>
     </div>
   </div>
 
   <!-- 加载中 -->
   <div id="loading" class="hidden text-center py-16">
-    <i class="fas fa-spinner fa-spin text-4xl text-primary"></i>
-    <p class="text-gray-500 mt-4">正在智能匹配院校...</p>
+    <i class="fas fa-spinner fa-spin text-3xl text-primary"></i>
+    <p class="text-gray-400 mt-3 text-sm">正在匹配院校...</p>
   </div>
 
   <!-- 结果概览 -->
   <div id="resultSummary" class="hidden mb-6 fade-in">
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-      <div class="text-center mb-4">
-        <span class="text-4xl font-extrabold text-primary" id="displayScore">500</span>
-        <span class="text-gray-500 text-lg">分</span>
-        <span class="ml-3 px-3 py-1 rounded-full text-sm font-medium" id="displaySubject"></span>
+    <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+      <div class="text-center mb-5">
+        <span class="text-3xl font-bold text-gray-900" id="displayScore">500</span>
+        <span class="text-gray-400 text-base">分</span>
+        <span class="ml-2 px-3 py-0.5 rounded-full text-xs font-medium" id="displaySubject"></span>
       </div>
       <div class="grid grid-cols-3 gap-3 text-center">
         <div class="p-3 rounded-xl bg-rose-50 border border-rose-100">
-          <div class="text-2xl font-extrabold text-rose-500" id="countChongci">0</div>
-          <div class="text-xs text-gray-500 mt-1">冲刺</div>
+          <div class="text-xl font-bold text-rose-500" id="countChongci">0</div>
+          <div class="text-xs text-gray-400 mt-0.5">冲刺</div>
         </div>
         <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-100">
-          <div class="text-2xl font-extrabold text-emerald-500" id="countWentuo">0</div>
-          <div class="text-xs text-gray-500 mt-1">稳妥</div>
+          <div class="text-xl font-bold text-emerald-500" id="countWentuo">0</div>
+          <div class="text-xs text-gray-400 mt-0.5">稳妥</div>
         </div>
         <div class="p-3 rounded-xl bg-blue-50 border border-blue-100">
-          <div class="text-2xl font-extrabold text-blue-500" id="countBaodi">0</div>
-          <div class="text-xs text-gray-500 mt-1">保底</div>
+          <div class="text-xl font-bold text-blue-500" id="countBaodi">0</div>
+          <div class="text-xs text-gray-400 mt-0.5">保底</div>
         </div>
       </div>
     </div>
@@ -142,7 +139,7 @@ input[type="number"]::-webkit-inner-spin-button { opacity: 1; }
   <!-- 结果列表 -->
   <div id="resultArea" class="hidden mb-12"></div>
 
-  <!-- 免责提示 -->
+  <!-- 免责 -->
   <div class="text-center mb-8 text-xs text-gray-400">
     <i class="fas fa-info-circle mr-1"></i>
     数据仅供参考，实际录取以云南省招生考试院公布为准
@@ -150,17 +147,16 @@ input[type="number"]::-webkit-inner-spin-button { opacity: 1; }
 </section>
 
 <!-- ===== FOOTER ===== -->
-<footer class="bg-gray-900 text-gray-400 py-8 mt-8">
-  <div class="max-w-5xl mx-auto px-4 text-center text-sm">
+<footer class="border-t border-gray-100 py-10">
+  <div class="max-w-5xl mx-auto px-5 text-center text-sm text-gray-400">
     <p>数据来源：云南省招生考试院及各院校官网</p>
-    <p class="mt-1">&copy; 2025 云南高考指南 · 公益查询工具</p>
+    <p class="mt-1">&copy; 2026 云南高考指南 · 公益查询工具</p>
   </div>
 </footer>
 
 <script>
 // ===== 当前状态 =====
 let subject = 'like';
-const MAIN_SCORE = 500;
 
 // ===== 分数线参考 (2024年云南) =====
 const LINES = {
@@ -169,9 +165,7 @@ const LINES = {
 };
 
 // ===== 院校数据库 =====
-// scoreRange: [最低分, 最高分)  理科/文科数据
 const SCHOOLS = [
-  // ======== 顶尖985 ========
   { name:'清华大学', city:'北京', type:'985/211', tag:'顶尖', like:[685,750], wenke:[660,750] },
   { name:'北京大学', city:'北京', type:'985/211', tag:'顶尖', like:[680,750], wenke:[655,750] },
   { name:'复旦大学', city:'上海', type:'985/211', tag:'顶尖', like:[665,685], wenke:[645,660] },
@@ -180,8 +174,6 @@ const SCHOOLS = [
   { name:'中国科学技术大学', city:'安徽', type:'985/211', tag:'顶尖', like:[665,685], wenke:[620,640] },
   { name:'南京大学', city:'江苏', type:'985/211', tag:'顶尖', like:[655,675], wenke:[630,645] },
   { name:'中国人民大学', city:'北京', type:'985/211', tag:'顶尖', like:[655,675], wenke:[640,655] },
-
-  // ======== 985院校 ========
   { name:'武汉大学', city:'湖北', type:'985/211', tag:'985', like:[630,660], wenke:[615,635] },
   { name:'华中科技大学', city:'湖北', type:'985/211', tag:'985', like:[625,655], wenke:[600,620] },
   { name:'西安交通大学', city:'陕西', type:'985/211', tag:'985', like:[635,660], wenke:[605,625] },
@@ -203,8 +195,6 @@ const SCHOOLS = [
   { name:'大连理工大学', city:'辽宁', type:'985/211', tag:'985', like:[600,625], wenke:[570,590] },
   { name:'西北工业大学', city:'陕西', type:'985/211', tag:'985', like:[610,635], wenke:[575,595] },
   { name:'兰州大学', city:'甘肃', type:'985/211', tag:'985', like:[580,610], wenke:[570,590] },
-
-  // ======== 211院校 ========
   { name:'云南大学', city:'昆明', type:'211', tag:'省内', like:[550,590], wenke:[570,600] },
   { name:'昆明理工大学', city:'昆明', type:'一本', tag:'省内', like:[510,560], wenke:[530,560] },
   { name:'云南师范大学', city:'昆明', type:'一本', tag:'省内师范', like:[505,545], wenke:[535,565] },
@@ -226,8 +216,6 @@ const SCHOOLS = [
   { name:'南京理工大学', city:'江苏', type:'211', tag:'理工', like:[590,620], wenke:[555,575] },
   { name:'河海大学', city:'江苏', type:'211', tag:'水利', like:[570,600], wenke:[555,575] },
   { name:'南昌大学', city:'江西', type:'211', tag:'综合', like:[540,575], wenke:[550,575] },
-
-  // ======== 普通一本 / 热门二本 ========
   { name:'昆明学院', city:'昆明', type:'二本', tag:'省内', like:[440,490], wenke:[480,520] },
   { name:'曲靖师范学院', city:'曲靖', type:'二本', tag:'省内师范', like:[435,480], wenke:[475,515] },
   { name:'玉溪师范学院', city:'玉溪', type:'二本', tag:'省内师范', like:[430,475], wenke:[470,510] },
@@ -247,8 +235,6 @@ const SCHOOLS = [
   { name:'云南师范大学商学院', city:'昆明', type:'二本', tag:'民办', like:[420,445], wenke:[465,490] },
   { name:'云南艺术学院', city:'昆明', type:'二本', tag:'艺术', like:[420,460], wenke:[465,500] },
   { name:'云南警官学院', city:'昆明', type:'二本', tag:'公安', like:[460,510], wenke:[500,540] },
-
-  // ======== 省外二本 ========
   { name:'成都理工大学', city:'四川', type:'一本', tag:'省外', like:[545,575], wenke:[555,575] },
   { name:'四川师范大学', city:'四川', type:'二本', tag:'省外师范', like:[490,535], wenke:[530,560] },
   { name:'重庆邮电大学', city:'重庆', type:'二本', tag:'省外通信', like:[520,560], wenke:[525,555] },
@@ -260,8 +246,6 @@ const SCHOOLS = [
   { name:'贵州财经大学', city:'贵州', type:'二本', tag:'省外财经', like:[460,500], wenke:[500,530] },
   { name:'贵州医科大学', city:'贵州', type:'二本', tag:'省外医学', like:[500,545], wenke:[520,550] },
   { name:'遵义医科大学', city:'贵州', type:'二本', tag:'省外医学', like:[490,530], wenke:[515,545] },
-
-  // ======== 热门专科 ========
   { name:'昆明冶金高等专科学校', city:'昆明', type:'专科', tag:'省内', like:[350,420], wenke:[400,465] },
   { name:'云南交通职业技术学院', city:'昆明', type:'专科', tag:'省内', like:[360,420], wenke:[410,465] },
   { name:'云南国土资源职业学院', city:'昆明', type:'专科', tag:'省内', like:[300,400], wenke:[350,440] },
@@ -282,12 +266,12 @@ function setSubject(val) {
   const likeBtn = document.getElementById('btnLiKe');
   const wenkeBtn = document.getElementById('btnWenKe');
   if (val === 'like') {
-    likeBtn.className = 'flex-1 py-3 px-4 rounded-xl border-2 font-bold text-sm transition-all bg-primary text-white border-primary';
-    wenkeBtn.className = 'flex-1 py-3 px-4 rounded-xl border-2 font-bold text-sm transition-all bg-white text-gray-600 border-gray-200';
+    likeBtn.className = 'flex-1 py-3 px-4 rounded-xl border-2 font-semibold text-sm transition-all bg-primary text-white border-primary';
+    wenkeBtn.className = 'flex-1 py-3 px-4 rounded-xl border-2 font-semibold text-sm transition-all bg-white text-gray-600 border-gray-200';
     document.getElementById('yibenLine').textContent = LINES.like.yiben;
   } else {
-    likeBtn.className = 'flex-1 py-3 px-4 rounded-xl border-2 font-bold text-sm transition-all bg-white text-gray-600 border-gray-200';
-    wenkeBtn.className = 'flex-1 py-3 px-4 rounded-xl border-2 font-bold text-sm transition-all bg-primary text-white border-primary';
+    likeBtn.className = 'flex-1 py-3 px-4 rounded-xl border-2 font-semibold text-sm transition-all bg-white text-gray-600 border-gray-200';
+    wenkeBtn.className = 'flex-1 py-3 px-4 rounded-xl border-2 font-semibold text-sm transition-all bg-primary text-white border-primary';
     document.getElementById('yibenLine').textContent = LINES.wenke.yiben;
   }
 }
@@ -302,7 +286,7 @@ function quickScore(val) {
   search();
 }
 
-// ===== 核心查询逻辑 =====
+// ===== 核心查询 =====
 function search() {
   const score = parseInt(document.getElementById('scoreInput').value);
   if (!score || score < 0 || score > 750) {
@@ -310,54 +294,41 @@ function search() {
     return;
   }
 
-  // 显示加载
   document.getElementById('loading').classList.remove('hidden');
   document.getElementById('resultSummary').classList.add('hidden');
   document.getElementById('resultArea').classList.add('hidden');
 
   setTimeout(() => {
     const lines = LINES[subject];
-    const scoreField = subject; // 'like' or 'wenke'
+    const scoreField = subject;
 
-    // 匹配学校
     const matched = [];
     SCHOOLS.forEach(s => {
       const range = s[scoreField];
       if (!range) return;
       const [min, max] = range;
-      // 分数在录取范围内
       if (score >= min - 15 && score <= max + 5) {
         let level = 'baodi';
         const diff = score - (min + max) / 2;
         if (diff > 8) level = 'wentuo';
         if (diff < -8) level = 'chongci';
-        // 离录取线差15分以上也算保底
         if (score >= max + 3) level = 'baodi';
-
         matched.push({
-          name: s.name,
-          city: s.city,
-          type: s.type,
-          tag: s.tag,
-          level: level,
-          minScore: min,
-          maxScore: max,
+          name: s.name, city: s.city, type: s.type, tag: s.tag,
+          level: level, minScore: min, maxScore: max,
           avgScore: Math.round((min + max) / 2),
           diff: score - Math.round((min + max) / 2)
         });
       }
     });
 
-    // 排序：冲刺→稳妥→保底，按分数差排序
     const order = { chongci: 0, wentuo: 1, baodi: 2 };
     matched.sort((a, b) => {
       if (order[a.level] !== order[b.level]) return order[a.level] - order[b.level];
       return Math.abs(a.diff) - Math.abs(b.diff);
     });
 
-    // 渲染
     renderResults(score, matched);
-
     document.getElementById('loading').classList.add('hidden');
   }, 400);
 }
@@ -367,81 +338,72 @@ function renderResults(score, matched) {
   const wentuo = matched.filter(m => m.level === 'wentuo');
   const baodi = matched.filter(m => m.level === 'baodi');
 
-  // 摘要
   document.getElementById('displayScore').textContent = score;
   const subjName = subject === 'like' ? '理科' : '文科';
   const subjEl = document.getElementById('displaySubject');
   subjEl.textContent = subjName;
-  subjEl.className = 'ml-3 px-3 py-1 rounded-full text-sm font-medium ' +
-    (subject === 'like'
-      ? 'bg-blue-100 text-blue-700'
-      : 'bg-rose-100 text-rose-700');
+  subjEl.className = 'ml-2 px-3 py-0.5 rounded-full text-xs font-medium ' +
+    (subject === 'like' ? 'bg-primary-50 text-primary' : 'bg-rose-50 text-rose-600');
 
   document.getElementById('countChongci').textContent = chongci.length;
   document.getElementById('countWentuo').textContent = wentuo.length;
   document.getElementById('countBaodi').textContent = baodi.length;
-
   document.getElementById('resultSummary').classList.remove('hidden');
 
-  // 详情
   const area = document.getElementById('resultArea');
   let html = '';
-
-  if (chongci.length > 0) {
-    html += renderLevel(chongci, 'chongci', '🚀 冲刺院校', '分数略低于往年录取线，可以冲一冲', 'border-rose-200 bg-rose-50');
-  }
-  if (wentuo.length > 0) {
-    html += renderLevel(wentuo, 'wentuo', '✅ 稳妥院校', '分数匹配度高，录取概率较大', 'border-emerald-200 bg-emerald-50');
-  }
-  if (baodi.length > 0) {
-    html += renderLevel(baodi, 'baodi', '🛡️ 保底院校', '分数高于往年录取线，基本稳上', 'border-blue-200 bg-blue-50');
-  }
+  if (chongci.length > 0) html += renderLevel(chongci, 'chongci', '冲刺院校', '分数略低于往年录取线，可以冲一冲');
+  if (wentuo.length > 0) html += renderLevel(wentuo, 'wentuo', '稳妥院校', '分数匹配度高，录取概率较大');
+  if (baodi.length > 0) html += renderLevel(baodi, 'baodi', '保底院校', '分数高于往年录取线，基本稳上');
 
   if (matched.length === 0) {
     html = `
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
-        <i class="fas fa-search text-5xl text-gray-300 mb-4"></i>
-        <h3 class="text-xl font-bold text-gray-600 mb-2">未匹配到院校</h3>
-        <p class="text-gray-400">可能分数过高或过低，试试调整分数</p>
+      <div class="bg-white rounded-2xl border border-gray-100 p-12 text-center shadow-sm">
+        <i class="fas fa-search text-4xl text-gray-200 mb-4"></i>
+        <p class="text-gray-500 font-medium">未匹配到院校</p>
+        <p class="text-gray-400 text-sm mt-1">试试调整分数</p>
       </div>
     `;
   }
-
   area.innerHTML = html;
   area.classList.remove('hidden');
 }
 
-function renderLevel(schools, level, title, desc, borderStyle) {
-  const colors = {
-    chongci: { bg: 'bg-rose-100', text: 'text-rose-600', label: '冲刺' },
-    wentuo: { bg: 'bg-emerald-100', text: 'text-emerald-600', label: '稳妥' },
-    baodi: { bg: 'bg-blue-100', text: 'text-blue-600', label: '保底' }
+function renderLevel(schools, level, title, desc) {
+  const cfg = {
+    chongci: { bg: 'bg-rose-50', text: 'text-rose-600', dot: 'bg-rose-400', border: 'border-rose-100' },
+    wentuo: { bg: 'bg-emerald-50', text: 'text-emerald-600', dot: 'bg-emerald-400', border: 'border-emerald-100' },
+    baodi: { bg: 'bg-blue-50', text: 'text-blue-600', dot: 'bg-blue-400', border: 'border-blue-100' }
   };
-  const c = colors[level];
+  const c = cfg[level];
 
   return `
     <div class="mb-6 fade-in">
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="p-5 border-b border-gray-50">
-          <h3 class="text-lg font-bold">${title}</h3>
-          <p class="text-sm text-gray-500 mt-1">${desc}</p>
+      <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
+        <div class="px-5 py-4 border-b border-gray-50">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full ${c.dot}"></span>
+            <h3 class="font-semibold text-gray-900">${title}</h3>
+          </div>
+          <p class="text-xs text-gray-400 mt-0.5 ml-4">${desc}</p>
         </div>
         <div class="divide-y divide-gray-50">
           ${schools.map(s => `
-            <div class="result-card p-4 flex items-center justify-between hover:bg-gray-50/50">
+            <div class="result-card px-5 py-3.5 flex items-center justify-between">
               <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2">
-                  <span class="font-semibold text-gray-900 truncate">${s.name}</span>
-                  <span class="shrink-0 px-2 py-0.5 text-xs rounded-full ${c.bg} ${c.text} font-medium">${c.label}</span>
+                  <span class="font-medium text-gray-900 text-sm truncate">${s.name}</span>
+                  <span class="shrink-0 px-1.5 py-0.5 text-[10px] rounded ${c.bg} ${c.text} font-medium">${ {chongci:'冲刺', wentuo:'稳妥', baodi:'保底'}[level] }</span>
                 </div>
-                <div class="flex items-center gap-3 mt-1 text-xs text-gray-500">
-                  <span><i class="fas fa-map-pin mr-1"></i>${s.city}</span>
-                  <span class="px-1.5 py-0.5 bg-gray-100 rounded">${s.type}</span>
-                  ${s.tag ? `<span class="px-1.5 py-0.5 bg-gray-100 rounded">${s.tag}</span>` : ''}
+                <div class="flex items-center gap-2 mt-1 text-xs text-gray-400">
+                  <span>${s.city}</span>
+                  <span class="w-1 h-1 rounded-full bg-gray-300"></span>
+                  <span>${s.type}</span>
+                  ${s.tag ? `<span class="w-1 h-1 rounded-full bg-gray-300"></span><span>${s.tag}</span>` : ''}
                 </div>
               </div>
               <div class="text-right ml-4 shrink-0">
-                <div class="text-sm font-bold ${c.text}">${s.avgScore}</div>
+                <div class="text-sm font-semibold text-gray-900">${s.avgScore}</div>
                 <div class="text-xs text-gray-400">均分</div>
               </div>
             </div>
@@ -452,12 +414,11 @@ function renderLevel(schools, level, title, desc, borderStyle) {
   `;
 }
 
-// ===== 回车查询 =====
+// ===== Enter key =====
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('scoreInput').addEventListener('keydown', e => {
     if (e.key === 'Enter') search();
   });
-  // 默认首次查询
   search();
 });
 </script>
