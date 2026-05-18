@@ -877,7 +877,9 @@ function renderMobileReviews() {
     const c = randomItem(CITY_SHORTS);
     allReviews.push({ s, l: s+'家长', c, t: r });
   }
-  row.innerHTML = allReviews.map(r => `
+  // 重复一份用于无缝循环
+  const doubled = [...allReviews, ...allReviews];
+  row.innerHTML = doubled.map(r => `
     <div class="shrink-0 w-[240px] bg-gray-50 rounded-xl p-3.5 border border-gray-100">
       <div class="flex items-center gap-2 mb-2">
         <div class="w-7 h-7 rounded-full bg-brand-100 flex items-center justify-center text-[10px] font-bold text-brand-700">${r.s}</div>
@@ -887,6 +889,20 @@ function renderMobileReviews() {
       <p class="text-xs text-gray-600 leading-relaxed">"${r.t}"</p>
     </div>
   `).join('');
+  // 启动自动滚动
+  startReviewScroll(row, 240);
+}
+
+// ===== 移动端：评价自动滚动 =====
+function startReviewScroll(row, cardWidth) {
+  let pos = 0;
+  const gap = 12; // gap-3 = 12px
+  const totalWidth = 30 * (cardWidth + gap);
+  setInterval(() => {
+    pos += 0.5;
+    if (pos >= totalWidth) pos = 0;
+    row.scrollLeft = pos;
+  }, 30);
 }
 
 // ===== URL param =====
