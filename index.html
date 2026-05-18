@@ -580,6 +580,16 @@ const CITY_DETAILS = {
   ynOthers:{ localSchools:'各地州院校', description:'无论你在云南哪个角落，我们都有对应的家长交流群。', tips:['所有地州均可享受免费的志愿填报咨询服务','线上讲座和直播覆盖全省各地','专业老师一对一指导'] }
 };
 
+// ===== 倒计时自动更新 =====
+function updateCountdown() {
+  const now = new Date();
+  const gaokao = new Date(2026, 5, 7); // 2026年6月7日
+  const diff = Math.ceil((gaokao - now) / (1000 * 60 * 60 * 24));
+  document.querySelectorAll('.countdown-number').forEach(el => {
+    el.textContent = diff > 0 ? diff : 0;
+  });
+}
+
 // ===== 实时动态数据 =====
 const SURNAMES = ['李','王','张','刘','陈','杨','赵','黄','周','吴','徐','孙','马','胡','朱','郭','何','罗','高','林'];
 const CITY_SHORTS = CITIES.filter(c => c.id !== 'ynOthers').map(c => c.short);
@@ -596,7 +606,7 @@ function generateLiveFeed() {
   const feed = document.getElementById('liveFeed');
   if (!feed) return;
   let items = [];
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < 30; i++) {
     const surname = randomItem(SURNAMES);
     const city = randomItem(CITY_SHORTS);
     const action = randomItem(ACTIONS).replace('{name}', city);
@@ -612,8 +622,25 @@ function generateLiveFeed() {
       </div>
     `);
   }
-  // Duplicate for seamless scroll
   feed.innerHTML = items.join('') + items.join('');
+}
+
+// ===== 实时动态：JS驱动滚动 =====
+let feedAnimId = null;
+function startFeedScroll() {
+  const feed = document.getElementById('liveFeed');
+  const container = document.getElementById('liveFeedContainer');
+  if (!feed || !container) return;
+  // 用JS代替CSS动画，解决移动端兼容问题
+  let pos = 0;
+  const speed = 0.5; // 每帧像素
+  feedAnimId = setInterval(() => {
+    pos += speed;
+    if (pos >= feed.scrollHeight / 2) {
+      pos = 0;
+    }
+    feed.style.transform = `translateY(-${pos}px)`;
+  }, 30);
 }
 
 // ===== Render city grid =====
@@ -783,14 +810,18 @@ const MOBILE_BENEFITS = [
 function renderMobileBenefits() {
   const row = document.getElementById('mobileBenefitRow');
   if (!row) return;
-  row.innerHTML = MOBILE_BENEFITS.map(b => `
-    <div onclick="showMobileBenefit('${b.id}')" class="mobile-benefit-item shrink-0 w-[100px] bg-white rounded-xl border border-gray-100 p-3 text-center shadow-sm">
+  MOBILE_BENEFITS.forEach(b => {
+    const card = document.createElement('div');
+    card.className = 'mobile-benefit-item shrink-0 w-[100px] bg-white rounded-xl border border-gray-100 p-3 text-center shadow-sm cursor-pointer';
+    card.innerHTML = `
       <div class="w-10 h-10 rounded-xl ${b.color} flex items-center justify-center mx-auto mb-2">
         <i class="fas ${b.icon} ${b.iconColor} text-base"></i>
       </div>
       <div class="text-xs font-medium text-gray-800">${b.label}</div>
-    </div>
-  `).join('');
+    `;
+    card.addEventListener('click', () => showMobileBenefit(b.id));
+    row.appendChild(card);
+  });
 }
 
 // ===== 移动端：弹窗 =====
@@ -816,15 +847,40 @@ function closeModal() {
 function renderMobileReviews() {
   const row = document.getElementById('mobileReviewRow');
   if (!row) return;
-  const reviews = [
-    { i:'杨', l:'杨妈妈', c:'昆明', t:'去年加群真加对了，老师讲的征集志愿技巧帮孩子捡漏进了云大，太感谢了！' },
-    { i:'赵', l:'赵爸爸', c:'曲靖', t:'群里发的数据分析很实用，孩子480分以为只能上二本，最后冲上了一本院校。' },
-    { i:'李', l:'李妈妈', c:'大理', t:'第一次当高考家长什么都不懂，群里老师耐心解答，还给了免费手册，良心！' }
+  const reviewTexts = [
+    '老师讲的征集志愿技巧帮孩子捡漏进了云大，太感谢了！',
+    '数据分析很实用，孩子480分冲上了一本院校。',
+    '第一次当高考家长什么都不懂，群里老师耐心解答。',
+    '免费手册太良心了，80多页全是干货。',
+    '政策解读比官网还快，少数民族加分政策帮我省了10分。',
+    '同城家长群里信息互通，比一个人摸索强太多。',
+    '专家答疑很专业，平行志愿的坑帮我避开了。',
+    '孩子模考500分，群里老师给了详细的冲稳保方案。',
+    '讲座干货满满，笔记记了好几页。',
+    '本地院校的录取数据很全，不用自己到处查。',
+    '去年加群捡漏进了好大学，今年推荐给亲戚了。',
+    '老师一对一指导很耐心，从出分到填完全程跟进。',
+    '群里的填报手册电子版随时可以看，很方便。',
+    '本来想复读，听了建议好好填了征集志愿，成功了！',
+    '专项计划的解读帮我多了一个上好学校的机会。',
+    '节点提醒功能很好，不会错过重要时间。',
+    '大理家长群已经300多人了，氛围很好。',
+    '曲靖家长群每天都有人分享有用信息。',
+    '报志愿那几天老师几乎全天在线答疑。',
+    '查学校工具很准，推荐的学校和实际录取差不多。',
   ];
-  row.innerHTML = reviews.map(r => `
+  // 生成30条随机排列的评价
+  const allReviews = [];
+  for (let i = 0; i < 30; i++) {
+    const r = reviewTexts[i % reviewTexts.length];
+    const s = randomItem(SURNAMES);
+    const c = randomItem(CITY_SHORTS);
+    allReviews.push({ s, l: s+'家长', c, t: r });
+  }
+  row.innerHTML = allReviews.map(r => `
     <div class="shrink-0 w-[240px] bg-gray-50 rounded-xl p-3.5 border border-gray-100">
       <div class="flex items-center gap-2 mb-2">
-        <div class="w-7 h-7 rounded-full bg-brand-100 flex items-center justify-center text-[10px] font-bold text-brand-700">${r.i}</div>
+        <div class="w-7 h-7 rounded-full bg-brand-100 flex items-center justify-center text-[10px] font-bold text-brand-700">${r.s}</div>
         <div class="text-xs font-semibold text-gray-900">${r.l}</div>
         <span class="ml-auto text-warm-500 text-[10px]">★★★★★</span>
       </div>
@@ -842,8 +898,10 @@ function checkUrlParam() {
 
 // ===== Init =====
 document.addEventListener('DOMContentLoaded', () => {
+  updateCountdown();
   renderCities();
   generateLiveFeed();
+  startFeedScroll();
   renderMobileBenefits();
   renderMobileReviews();
   checkUrlParam();
