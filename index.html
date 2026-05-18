@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="pageTitle">云南高考志愿填报指导 | 各地州家长交流群</title>
+<meta name="description" id="pageDesc" content="云南高考志愿填报指导，覆盖昆明、曲靖、大理、玉溪等16个地州。加入当地家长交流群，获取最新高考政策解读和志愿填报技巧。">
+<meta name="keywords" content="云南高考志愿填报,高考志愿指导,云南家长群,高考咨询,昆明高考,曲靖高考,大理高考">
+<meta name="robots" content="index, follow">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        primary: '#1a56db',
+        'primary-dark': '#1e40af',
+        'primary-light': '#dbeafe',
+        accent: '#f59e0b',
+        'accent-dark': '#d97706',
+      }
+    }
+  }
+}
+</script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body { font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif; }
+.city-card { transition: all 0.3s ease; cursor: pointer; }
+.city-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(26,86,219,0.15); }
+.city-card .icon-wrap { transition: all 0.3s ease; }
+.city-card:hover .icon-wrap { transform: scale(1.1); }
+.fade-in { animation: fadeIn 0.5s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.step-line { position: relative; }
+.step-line::after { content: ''; position: absolute; top: 40px; left: 20px; width: 2px; height: calc(100% - 40px); background: #dbeafe; }
+.step-line:last-child::after { display: none; }
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary { list-style: none; cursor: pointer; }
+.faq-item[open] summary .fa-chevron-down { transform: rotate(180deg); }
+.form-input:focus { border-color: #1a56db; box-shadow: 0 0 0 3px rgba(26,86,219,0.1); }
+.bg-grid { background-image: linear-gradient(rgba(26,86,219,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(26,86,219,0.03) 1px, transparent 1px); background-size: 40px 40px; }
+</style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+<!-- ========== NAV ========== -->
+<nav class="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100">
+  <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-2 text-lg font-bold text-primary">
+      <i class="fas fa-graduation-cap text-2xl"></i>
+      <span>云南高考指南</span>
+    </a>
+    <div class="flex items-center gap-4 text-sm">
+      <a href="#cities" class="hidden sm:block text-gray-600 hover:text-primary transition-colors">各地州</a>
+      <a href="#how" class="hidden sm:block text-gray-600 hover:text-primary transition-colors">服务流程</a>
+      <a href="#faq" class="hidden sm:block text-gray-600 hover:text-primary transition-colors">常见问题</a>
+      <a href="#join" class="px-4 py-2 bg-primary text-white rounded-full text-sm font-medium hover:bg-primary-dark transition-colors">
+        <i class="fas fa-weixin mr-1"></i>加入家长群
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- ========== HERO ========== -->
+<section class="min-h-screen pt-16 bg-gradient-to-br from-blue-50 via-white to-indigo-50 bg-grid flex items-center">
+  <div class="max-w-6xl mx-auto px-4 py-20 md:py-32">
+    <div class="max-w-3xl">
+      <span class="inline-block px-3 py-1 bg-primary-light text-primary text-sm font-medium rounded-full mb-6">
+        <i class="fas fa-fire mr-1"></i>2025年云南高考 · 家长必看
+      </span>
+      <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 leading-tight mb-6">
+        高考志愿填报<br>
+        <span class="text-primary">别让孩子</span>
+        <span class="text-accent">辛苦考的分数</span>
+        <span class="text-primary">白费</span>
+      </h1>
+      <p class="text-lg md:text-xl text-gray-600 mb-8 leading-relaxed">
+        云南16个地州家长交流群已建立 · 本地化志愿指导 · 免费加入
+      </p>
+      <div class="flex flex-wrap gap-4">
+        <a href="#cities" class="px-8 py-4 bg-primary text-white rounded-xl font-bold text-lg shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:bg-primary-dark transition-all">
+          <i class="fas fa-users mr-2"></i>查看我的地州
+        </a>
+        <a href="#join" class="px-8 py-4 bg-white text-primary border-2 border-primary/20 rounded-xl font-bold text-lg hover:bg-primary-light/50 transition-all">
+          <i class="fab fa-weixin mr-2"></i>加入家长群
+        </a>
+      </div>
+    </div>
+    <!-- Stats -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16 max-w-3xl">
+      <div class="bg-white/80 backdrop-blur rounded-xl p-4 text-center border border-gray-100">
+        <div class="text-3xl font-extrabold text-primary">38万+</div>
+        <div class="text-sm text-gray-500 mt-1">2025云南高考生</div>
+      </div>
+      <div class="bg-white/80 backdrop-blur rounded-xl p-4 text-center border border-gray-100">
+        <div class="text-3xl font-extrabold text-accent">16个</div>
+        <div class="text-sm text-gray-500 mt-1">地州全覆盖</div>
+      </div>
+      <div class="bg-white/80 backdrop-blur rounded-xl p-4 text-center border border-gray-100">
+        <div class="text-3xl font-extrabold text-green-600">85%</div>
+        <div class="text-sm text-gray-500 mt-1">家长选择率</div>
+      </div>
+      <div class="bg-white/80 backdrop-blur rounded-xl p-4 text-center border border-gray-100">
+        <div class="text-3xl font-extrabold text-purple-600">10年+</div>
+        <div class="text-sm text-gray-500 mt-1">填报指导经验</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== PAIN POINTS ========== -->
+<section class="py-20 bg-white">
+  <div class="max-w-6xl mx-auto px-4">
+    <div class="text-center mb-12">
+      <span class="text-primary font-medium text-sm">YUNNAN GAOKAO</span>
+      <h2 class="text-3xl md:text-4xl font-bold mt-2">这些焦虑，你中了几条？</h2>
+    </div>
+    <div class="grid md:grid-cols-3 gap-8">
+      <div class="p-8 rounded-2xl bg-red-50 border border-red-100 text-center">
+        <div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-chart-line text-2xl text-red-500"></i>
+        </div>
+        <h3 class="text-xl font-bold mb-3">分数尴尬</h3>
+        <p class="text-gray-600">卡在分数线边缘，怕滑档怕退档，不知道该怎么选学校</p>
+        <div class="mt-4 text-sm text-red-500 font-medium">云南每年约15%考生滑档</div>
+      </div>
+      <div class="p-8 rounded-2xl bg-amber-50 border border-amber-100 text-center">
+        <div class="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-question-circle text-2xl text-amber-500"></i>
+        </div>
+        <h3 class="text-xl font-bold mb-3">信息太多</h3>
+        <p class="text-gray-600">几百所学校、上千个专业，完全不知道从哪看起</p>
+        <div class="mt-4 text-sm text-amber-500 font-medium">80%家长表示志愿填报最头疼</div>
+      </div>
+      <div class="p-8 rounded-2xl bg-blue-50 border border-blue-100 text-center">
+        <div class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-map-marked-alt text-2xl text-blue-500"></i>
+        </div>
+        <h3 class="text-xl font-bold mb-3">不懂政策</h3>
+        <p class="text-gray-600">征集志愿、提前批次、专项计划… 政策术语听不懂</p>
+        <div class="mt-4 text-sm text-blue-500 font-medium">专业指导可提分20-50分</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== CITIES ========== -->
+<section id="cities" class="py-20 bg-gray-50">
+  <div class="max-w-6xl mx-auto px-4">
+    <div class="text-center mb-12">
+      <span class="text-primary font-medium text-sm">COVERING ALL AREAS</span>
+      <h2 class="text-3xl md:text-4xl font-bold mt-2">选择你的地州</h2>
+      <p class="text-gray-500 mt-3">加入本地家长群，获取针对性指导</p>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4" id="cityGrid">
+      <!-- Cities will be rendered by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- ========== CITY DETAIL ========== -->
+<section id="cityDetail" class="py-20 bg-white hidden">
+  <div class="max-w-6xl mx-auto px-4">
+    <button onclick="closeCityDetail()" class="flex items-center gap-2 text-gray-500 hover:text-primary transition-colors mb-8">
+      <i class="fas fa-arrow-left"></i> 返回各地州
+    </button>
+    <div class="fade-in" id="cityDetailContent">
+      <!-- Dynamic content -->
+    </div>
+  </div>
+</section>
+
+<!-- ========== HOW IT WORKS ========== -->
+<section id="how" class="py-20 bg-white">
+  <div class="max-w-6xl mx-auto px-4">
+    <div class="text-center mb-16">
+      <span class="text-primary font-medium text-sm">HOW IT WORKS</span>
+      <h2 class="text-3xl md:text-4xl font-bold mt-2">如何加入？</h2>
+    </div>
+    <div class="max-w-3xl mx-auto">
+      <div class="step-line pl-12 pb-12 relative">
+        <div class="absolute left-0 top-0 w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold">1</div>
+        <h3 class="text-xl font-bold mb-2">选择你的地州</h3>
+        <p class="text-gray-500">在上方找到你所在的城市或自治州</p>
+      </div>
+      <div class="step-line pl-12 pb-12 relative">
+        <div class="absolute left-0 top-0 w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold">2</div>
+        <h3 class="text-xl font-bold mb-2">扫码加入家长群</h3>
+        <p class="text-gray-500">进入地州专属页面，扫码加入当地家长交流群</p>
+      </div>
+      <div class="step-line pl-12 pb-12 relative">
+        <div class="absolute left-0 top-0 w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold">3</div>
+        <h3 class="text-xl font-bold mb-2">免费听讲座</h3>
+        <p class="text-gray-500">高考后参加线下公益讲座，专家面对面解读</p>
+      </div>
+      <div class="step-line pl-12 relative">
+        <div class="absolute left-0 top-0 w-10 h-10 rounded-full bg-accent text-white flex items-center justify-center font-bold">4</div>
+        <h3 class="text-xl font-bold mb-2">一对一志愿指导</h3>
+        <p class="text-gray-500">专业老师根据分数、排名、意向，量身定制志愿方案</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== FAQ ========== -->
+<section id="faq" class="py-20 bg-gray-50">
+  <div class="max-w-4xl mx-auto px-4">
+    <div class="text-center mb-12">
+      <span class="text-primary font-medium text-sm">FAQ</span>
+      <h2 class="text-3xl md:text-4xl font-bold mt-2">常见问题</h2>
+    </div>
+    <div class="space-y-3">
+      <details class="faq-item bg-white rounded-xl p-5 border border-gray-100 [&[open]]:shadow-md transition-all">
+        <summary class="flex items-center justify-between text-lg font-medium">
+          <span>加入家长群收费吗？</span>
+          <i class="fas fa-chevron-down text-primary transition-transform"></i>
+        </summary>
+        <p class="mt-4 text-gray-600 leading-relaxed">完全免费。我们建立家长群的目的是为了让更多家长了解高考志愿填报的重要性，群内会定期分享政策解读和填报技巧，没有任何隐形收费。</p>
+      </details>
+      <details class="faq-item bg-white rounded-xl p-5 border border-gray-100 [&[open]]:shadow-md transition-all">
+        <summary class="flex items-center justify-between text-lg font-medium">
+          <span>讲座什么时候举办？</span>
+          <i class="fas fa-chevron-down text-primary transition-transform"></i>
+        </summary>
+        <p class="mt-4 text-gray-600 leading-relaxed">高考结束后（6月中下旬）会在各地州举办线下公益讲座，具体时间和地点会在群里提前通知。同时也会有线上直播，方便不能到场的家长。</p>
+      </details>
+      <details class="faq-item bg-white rounded-xl p-5 border border-gray-100 [&[open]]:shadow-md transition-all">
+        <summary class="flex items-center justify-between text-lg font-medium">
+          <span>志愿指导服务包含什么？</span>
+          <i class="fas fa-chevron-down text-primary transition-transform"></i>
+        </summary>
+        <p class="mt-4 text-gray-600 leading-relaxed">包括：分数定位分析、院校筛选、专业推荐、志愿表审核、风险评估。由10年以上经验的专家团队一对一服务，确保每个志愿都物尽其用。</p>
+      </details>
+      <details class="faq-item bg-white rounded-xl p-5 border border-gray-100 [&[open]]:shadow-md transition-all">
+        <summary class="flex items-center justify-between text-lg font-medium">
+          <span>云南高考有哪些特殊政策？</span>
+          <i class="fas fa-chevron-down text-primary transition-transform"></i>
+        </summary>
+        <p class="mt-4 text-gray-600 leading-relaxed">云南省有专项计划（国家专项、地方专项、高校专项）、少数民族预科班、定向就业招生等特殊类型招生。不同地州的政策覆盖范围不同，具体内容加入对应地州群了解。</p>
+      </details>
+      <details class="faq-item bg-white rounded-xl p-5 border border-gray-100 [&[open]]:shadow-md transition-all">
+        <summary class="flex items-center justify-between text-lg font-medium">
+          <span>群加了有什么用？</span>
+          <i class="fas fa-chevron-down text-primary transition-transform"></i>
+        </summary>
+        <p class="mt-4 text-gray-600 leading-relaxed">群内可获取：①最新高考政策解读 ②志愿填报技巧和避坑指南 ③往届录取数据参考 ④线下讲座通知 ⑤同城家长交流经验。</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ========== JOIN ========== -->
+<section id="join" class="py-20 bg-gradient-to-br from-primary to-primary-dark text-white">
+  <div class="max-w-4xl mx-auto px-4 text-center">
+    <i class="fab fa-weixin text-6xl mb-6 opacity-80"></i>
+    <h2 class="text-3xl md:text-4xl font-bold mb-4">立即加入你的地州家长群</h2>
+    <p class="text-xl opacity-90 mb-8">选择地州 → 扫码进群 → 免费获取高考志愿填报指导</p>
+    <div class="flex flex-wrap justify-center gap-4">
+      <a href="#cities" class="px-8 py-4 bg-white text-primary rounded-xl font-bold text-lg hover:bg-gray-100 transition-all shadow-lg">
+        <i class="fas fa-map-marker-alt mr-2"></i>选择地州
+      </a>
+      <a href="https://work.weixin.qq.com/" target="_blank" class="px-8 py-4 bg-white/10 backdrop-blur border border-white/30 rounded-xl font-bold text-lg hover:bg-white/20 transition-all">
+        <i class="fas fa-headset mr-2"></i>联系客服
+      </a>
+    </div>
+    <p class="mt-8 text-sm opacity-70">* 每个地州群仅限当地家长加入，请如实选择</p>
+  </div>
+</section>
+
+<!-- ========== FOOTER ========== -->
+<footer class="py-12 bg-gray-900 text-gray-400">
+  <div class="max-w-6xl mx-auto px-4">
+    <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <i class="fas fa-graduation-cap text-xl text-primary"></i>
+        <span class="text-white font-bold text-lg">云南高考指南</span>
+      </div>
+      <div class="text-sm text-center md:text-right">
+        <p>致力于帮助云南考生科学填报志愿，不浪费每一分</p>
+        <p class="mt-1">&copy; 2025 云南高考指南. All rights reserved.</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ========== JAVASCRIPT ========== -->
+<script>
+// ===== 云南16个地州数据 =====
+const CITIES = [
+  {
+    id: 'kunming', name: '昆明市', short: '昆明', badge: '省会',
+    color: 'from-blue-500 to-blue-600',
+    icon: 'fa-city',
+    stats: { students: '6.2万+', schools: '48所', rate: '82%' },
+    localSchools: '云南大学、昆明理工大学、云南师范大学、昆明医科大学、云南财经大学、云南民族大学',
+    description: '昆明作为云南省会，教育资源集中，竞争也最为激烈。每年高考人数位居全省前列，家长对志愿填报的需求尤为迫切。',
+    tips: [
+      '昆明考生竞争激烈，建议提前做好院校梯度规划',
+      '利用省会优势，多参加高校开放日活动',
+      '关注云南大学"双一流"建设动态'
+    ]
+  },
+  {
+    id: 'qujing', name: '曲靖市', short: '曲靖', badge: '教育强市',
+    color: 'from-emerald-500 to-emerald-600',
+    icon: 'fa-school',
+    stats: { students: '5.8万+', schools: '42所', rate: '78%' },
+    localSchools: '曲靖师范学院、曲靖医学高等专科学校',
+    description: '曲靖是云南教育重镇，曲靖一中闻名全省。每年高考人数众多，考生整体素质较高，志愿填报需要更加精细化。',
+    tips: [
+      '曲靖一中、二中考生可重点关注985/211院校',
+      '发挥教育强市优势，多与优秀考生交流经验',
+      '关注医学类、师范类院校在曲靖的招生计划'
+    ]
+  },
+  {
+    id: 'dali', name: '大理州', short: '大理', badge: '旅游名城',
+    color: 'from-purple-500 to-purple-600',
+    icon: 'fa-landmark',
+    stats: { students: '2.8万+', schools: '30所', rate: '76%' },
+    localSchools: '大理大学、大理农林职业技术学院',
+    description: '大理作为滇西教育中心，下关一中、大理一中等优质学校集中。每年高考成绩在滇西地区名列前茅。',
+    tips: [
+      '关注大理大学医学类、民族文化类专业',
+      '滇西考生可考虑就近就读，降低生活成本',
+      '旅游管理、民族文化等特色专业值得关注'
+    ]
+  },
+  {
+    id: 'yuxi', name: '玉溪市', short: '玉溪', badge: '宜居之城',
+    color: 'from-cyan-500 to-cyan-600',
+    icon: 'fa-water',
+    stats: { students: '2.2万+', schools: '28所', rate: '80%' },
+    localSchools: '玉溪师范学院',
+    description: '玉溪经济较发达，教育资源在滇中地区仅次于昆明。家长对教育的投入意愿强，志愿填报咨询需求量大。',
+    tips: [
+      '玉溪考生可重点关注昆明高校，距离近、成本低',
+      '烟草相关专业有本地产业优势',
+      '师范类专业在玉溪就业前景好'
+    ]
+  },
+  {
+    id: 'honghe', name: '红河州', short: '红河', badge: '人口大州',
+    color: 'from-red-500 to-red-600',
+    icon: 'fa-mountain',
+    stats: { students: '3.5万+', schools: '35所', rate: '75%' },
+    localSchools: '红河学院、红河卫生职业学院',
+    description: '红河州是云南人口大州，高考人数位居全省前列。个旧、开远、蒙自等地教育资源分布较为均衡。',
+    tips: [
+      '红河州考生可关注边境贸易相关专业',
+      '蒙自经开区发展迅速，理工科就业机会增多',
+      '关注红河学院定向培养计划'
+    ]
+  },
+  {
+    id: 'chuxiong', name: '楚雄州', short: '楚雄', badge: '滇中明珠',
+    color: 'from-orange-500 to-orange-600',
+    icon: 'fa-leaf',
+    stats: { students: '1.8万+', schools: '25所', rate: '77%' },
+    localSchools: '楚雄师范学院、楚雄医药高等专科学校',
+    description: '楚雄地处滇中，交通便利，教育水平稳步提升。少数民族考生可享受加分政策，志愿填报策略有所不同。',
+    tips: [
+      '少数民族考生充分利用加分政策',
+      '楚雄师范学院升本后教学质量显著提升',
+      '关注乡村振兴相关定向培养计划'
+    ]
+  },
+  {
+    id: 'zhaotong', name: '昭通市', short: '昭通', badge: '人口大市',
+    color: 'from-teal-500 to-teal-600',
+    icon: 'fa-users',
+    stats: { students: '4.5万+', schools: '38所', rate: '72%' },
+    localSchools: '昭通学院',
+    description: '昭通人口众多，高考人数位居云南前列。近年来教育投入加大，成绩提升明显，志愿填报指导需求旺盛。',
+    tips: [
+      '昭通考生基数大，竞争激烈，务必做好保底志愿',
+      '关注面向乌蒙山区的专项招生计划',
+      '师范、医学类专业在昭通就业稳定'
+    ]
+  },
+  {
+    id: 'wenshan', name: '文山州', short: '文山', badge: '三七之乡',
+    color: 'from-green-500 to-green-600',
+    icon: 'fa-seedling',
+    stats: { students: '2.6万+', schools: '30所', rate: '73%' },
+    localSchools: '文山学院',
+    description: '文山地处滇东南，是重要的边境地区。随着教育扶贫政策的推进，高考升学率逐年提升。',
+    tips: [
+      '边境县考生可享受边境专项招生政策',
+      '关注文山学院的民族文化研究方向',
+      '三七产业相关专业有本地就业优势'
+    ]
+  },
+  {
+    id: 'baoshan', name: '保山市', short: '保山', badge: '滇西重镇',
+    color: 'from-indigo-500 to-indigo-600',
+    icon: 'fa-history',
+    stats: { students: '1.6万+', schools: '22所', rate: '76%' },
+    localSchools: '保山学院、保山中医专',
+    description: '保山是滇西重要城市，腾冲教育尤为突出。近年来高考成绩稳步提升。',
+    tips: [
+      '腾冲考生可关注旅游管理、珠宝鉴定等特色专业',
+      '中医类专业的本地就业前景良好',
+      '关注滇西边境山区专项招生计划'
+    ]
+  },
+  {
+    id: 'lijiang', name: '丽江市', short: '丽江', badge: '旅游胜地',
+    color: 'from-pink-500 to-pink-600',
+    icon: 'fa-music',
+    stats: { students: '1.2万+', schools: '18所', rate: '78%' },
+    localSchools: '丽江师范学院（筹）、丽江文化旅游学院',
+    description: '丽江是世界文化遗产地，旅游业发达。当地考生在旅游管理、民族文化等专业上有独特优势。',
+    tips: [
+      '旅游管理、酒店管理专业在丽江就业前景广阔',
+      '关注丽江文化旅游学院的应用型本科专业',
+      '民族文化传承相关专业具有独特优势'
+    ]
+  },
+  {
+    id: 'puer', name: '普洱市', short: '普洱', badge: '茶城',
+    color: 'from-yellow-600 to-yellow-700',
+    icon: 'fa-mug-saucer',
+    stats: { students: '1.4万+', schools: '20所', rate: '74%' },
+    localSchools: '普洱学院、云南农业大学热带作物学院',
+    description: '普洱以茶文化闻名，农业、生态类专业具有本地特色。高考人数适中，教育资源持续改善。',
+    tips: [
+      '茶学、农业类专业在普洱有产业支撑',
+      '关注面向边疆地区的定向培养计划',
+      '生态保护、林学等专业就业前景看好'
+    ]
+  },
+  {
+    id: 'linxiang', name: '临沧市', short: '临沧', badge: '恒春之都',
+    color: 'from-lime-500 to-lime-600',
+    icon: 'fa-tree',
+    stats: { students: '1.3万+', schools: '19所', rate: '71%' },
+    localSchools: '滇西科技师范学院',
+    description: '临沧地处滇西南，边境线长。近年来教育投入不断加大，高考升学率持续提升。',
+    tips: [
+      '关注滇西科技师范学院的师范类定向培养',
+      '边境考生可申请专项招生计划',
+      '甘蔗、茶叶等特色农业相关专业值得关注'
+    ]
+  },
+  {
+    id: 'dehong', name: '德宏州', short: '德宏', badge: '孔雀之乡',
+    color: 'from-rose-500 to-rose-600',
+    icon: 'fa-feather',
+    stats: { students: '1.0万+', schools: '16所', rate: '75%' },
+    localSchools: '德宏师范高等专科学校',
+    description: '德宏州与缅甸接壤，是云南省重要的边境地区。傣族、景颇族等少数民族考生占比较高。',
+    tips: [
+      '少数民族考生充分利用加分和预科政策',
+      '东南亚语种（泰语、缅甸语）专业就业前景好',
+      '关注面向边境地区的定向培养计划'
+    ]
+  },
+  {
+    id: 'nujiang', name: '怒江州', short: '怒江', badge: '峡谷秘境',
+    color: 'from-slate-500 to-slate-600',
+    icon: 'fa-water',
+    stats: { students: '0.5万+', schools: '10所', rate: '70%' },
+    localSchools: '怒江职业技术学院',
+    description: '怒江州地处横断山脉，地理环境特殊。虽然考生人数少，但近年来教育质量提升显著。',
+    tips: [
+      '充分利用专项计划和加分政策',
+      '关注乡村振兴定向培养人才计划',
+      '生态保护、地质勘探等特色专业可关注'
+    ]
+  },
+  {
+    id: 'diqing', name: '迪庆州', short: '迪庆', badge: '高原明珠',
+    color: 'from-violet-500 to-violet-600',
+    icon: 'fa-snowflake',
+    stats: { students: '0.3万+', schools: '8所', rate: '72%' },
+    localSchools: '迪庆职业技术学院',
+    description: '迪庆州位于青藏高原东南缘，藏族人口占比高。是全省最特殊的高考区域之一。',
+    tips: [
+      '藏族等少数民族考生享受最优惠加分政策',
+      '关注藏语定向培养和民族文化传承专业',
+      '生态旅游、高原农业等特色专业前景广阔'
+    ]
+  },
+  {
+    id: 'ynOthers', name: '其他地区', short: '云南其他', badge: '全域覆盖',
+    color: 'from-gray-500 to-gray-600',
+    icon: 'fa-globe',
+    stats: { students: '3万+', schools: '30+所', rate: '74%' },
+    localSchools: '各地州院校',
+    description: '无论你在云南哪个角落，我们都有对应的家长交流群。加入我们，获取最新高考资讯。',
+    tips: [
+      '所有地州均可享受免费的志愿填报咨询服务',
+      '线上讲座和直播覆盖全省各地',
+      '专业老师一对一指导，不让你多花一分冤枉钱'
+    ]
+  }
+];
+
+// ===== 城市图标映射 =====
+const CITY_ICONS = {
+  kunming: '🏙️', qujing: '📚', dali: '🏔️', yuxi: '🌊',
+  honghe: '⛰️', chuxiong: '🌿', zhaotong: '👥', wenshan: '🌱',
+  baoshan: '🏛️', lijiang: '🎵', puer: '🍵', linxiang: '🌴',
+  dehong: '🦚', nujiang: '🏞️', diqing: '❄️', ynOthers: '🇨🇳'
+};
+
+// ===== 渲染城市网格 =====
+function renderCities() {
+  const grid = document.getElementById('cityGrid');
+  grid.innerHTML = CITIES.map(c => `
+    <div onclick="showCity('${c.id}')" class="city-card bg-white rounded-xl border border-gray-100 p-4 text-center shadow-sm">
+      <div class="icon-wrap w-14 h-14 rounded-2xl bg-gradient-to-br ${c.color} flex items-center justify-center mx-auto mb-3 text-2xl">
+        ${CITY_ICONS[c.id]}
+      </div>
+      <h3 class="font-bold text-gray-900">${c.name}</h3>
+      <span class="inline-block mt-1 px-2 py-0.5 bg-blue-50 text-primary text-xs rounded-full">${c.badge}</span>
+      <p class="text-xs text-gray-400 mt-2">考生 ${c.stats.students}</p>
+    </div>
+  `).join('');
+}
+
+// ===== 显示城市详情 =====
+let currentCity = null;
+
+function showCity(cityId) {
+  const city = CITIES.find(c => c.id === cityId);
+  if (!city) return;
+  currentCity = city;
+
+  // Update detail section
+  const detail = document.getElementById('cityDetail');
+  const content = document.getElementById('cityDetailContent');
+
+  content.innerHTML = `
+    <div class="bg-gradient-to-br ${city.color} rounded-2xl p-8 md:p-12 text-white mb-8">
+      <div class="text-5xl mb-4">${CITY_ICONS[city.id]}</div>
+      <h2 class="text-3xl md:text-4xl font-extrabold mb-2">${city.name}家长交流群</h2>
+      <p class="text-lg opacity-90">${city.badge} · 考生 ${city.stats.students} · ${city.stats.schools}</p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-4 mb-8">
+      <div class="bg-white rounded-xl p-5 border border-gray-100 text-center shadow-sm">
+        <div class="text-2xl font-extrabold text-primary">${city.stats.students}</div>
+        <div class="text-sm text-gray-500">高考考生</div>
+      </div>
+      <div class="bg-white rounded-xl p-5 border border-gray-100 text-center shadow-sm">
+        <div class="text-2xl font-extrabold text-accent">${city.stats.schools}</div>
+        <div class="text-sm text-gray-500">高中学校</div>
+      </div>
+      <div class="bg-white rounded-xl p-5 border border-gray-100 text-center shadow-sm">
+        <div class="text-2xl font-extrabold text-green-600">${city.stats.rate}</div>
+        <div class="text-sm text-gray-500">本科上线率</div>
+      </div>
+    </div>
+
+    <div class="mb-8">
+      <h3 class="text-xl font-bold mb-4">关于 ${city.name} 高考</h3>
+      <p class="text-gray-600 leading-relaxed">${city.description}</p>
+    </div>
+
+    <div class="mb-8">
+      <h3 class="text-xl font-bold mb-4">本地主要院校</h3>
+      <div class="flex flex-wrap gap-2">
+        ${city.localSchools.split('、').map(s => `
+          <span class="px-3 py-1 bg-blue-50 text-primary text-sm rounded-full border border-blue-100">${s}</span>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="mb-8">
+      <h3 class="text-xl font-bold mb-4">💡 ${city.name}考生填报建议</h3>
+      <ul class="space-y-3">
+        ${city.tips.map(t => `
+          <li class="flex items-start gap-3 p-3 bg-orange-50 rounded-xl">
+            <i class="fas fa-lightbulb text-accent mt-1"></i>
+            <span class="text-gray-700">${t}</span>
+          </li>
+        `).join('')}
+      </ul>
+    </div>
+
+    <div class="bg-gradient-to-r from-primary-light to-blue-50 rounded-2xl p-8 text-center border border-primary/20">
+      <i class="fab fa-weixin text-5xl text-primary mb-4"></i>
+      <h3 class="text-2xl font-bold mb-2">加入 ${city.name} 家长群</h3>
+      <p class="text-gray-600 mb-2">扫码进群，获取本地化高考志愿填报指导</p>
+      <p class="text-sm text-gray-400 mb-6">添加客服微信，备注"${city.short}家长"即可进群</p>
+      <div class="flex flex-wrap justify-center gap-4">
+        <a href="#join" class="px-6 py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary-dark transition-colors shadow-lg shadow-primary/20">
+          <i class="fab fa-weixin mr-2"></i>添加客服进群
+        </a>
+      </div>
+    </div>
+  `;
+
+  // Hide cities section, show detail
+  document.getElementById('cityGrid').closest('section').classList.add('hidden');
+  detail.classList.remove('hidden');
+  detail.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  // Update page title
+  document.title = `${city.name}高考家长群 | 云南高考志愿填报指导`;
+  document.querySelector('meta[name="description"]').content = `${city.name}高考志愿填报指导，加入${city.name}家长交流群，获取本地化高考政策解读、志愿填报技巧和院校推荐。`;
+}
+
+function closeCityDetail() {
+  document.getElementById('cityDetail').classList.add('hidden');
+  document.getElementById('cityGrid').closest('section').classList.remove('hidden');
+  document.getElementById('cities').scrollIntoView({ behavior: 'smooth' });
+  document.title = '云南高考志愿填报指导 | 各地州家长交流群';
+  document.querySelector('meta[name="description"]').content = '云南高考志愿填报指导，覆盖昆明、曲靖、大理、玉溪等16个地州。加入当地家长交流群，获取最新高考政策解读和志愿填报技巧。';
+}
+
+// ===== 检查URL参数自动跳转 =====
+function checkUrlParam() {
+  const params = new URLSearchParams(window.location.search);
+  const city = params.get('city');
+  if (city) {
+    // Wait for render, then show city
+    setTimeout(() => showCity(city), 100);
+  }
+}
+
+// ===== 初始化 =====
+document.addEventListener('DOMContentLoaded', () => {
+  renderCities();
+  checkUrlParam();
+});
+</script>
+</body>
+</html>
