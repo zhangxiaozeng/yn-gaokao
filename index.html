@@ -99,8 +99,40 @@ details.benefit-card summary { list-style:none; }
   </div>
 </nav>
 
-<!-- ========== HERO ========== -->
-<section class="pt-28 pb-16 md:pt-36 md:pb-20 relative overflow-hidden" style="background:linear-gradient(135deg,#eff6ff 0%,#ffffff 40%,#fef3c7 100%)">
+<!-- ========== HERO (手机版) ========== -->
+<section class="lg:hidden relative bg-gradient-to-br from-brand-800 via-brand-700 to-brand-900 text-white overflow-hidden">
+  <div class="absolute top-[-60px] right-[-60px] w-40 h-40 bg-white/5 rounded-full"></div>
+  <div class="absolute bottom-[-30px] left-[-30px] w-32 h-32 bg-white/5 rounded-full"></div>
+  <div class="px-5 pt-14 pb-7">
+    <div class="inline-flex items-center gap-2 bg-white/15 backdrop-blur rounded-full px-3 py-1.5 mb-3">
+      <span class="live-dot w-2 h-2 rounded-full bg-green-400 inline-block"></span>
+      <span class="text-xs text-blue-100">距离2026高考还有</span>
+      <span class="countdown-number text-white font-bold text-sm bg-white/20 px-2 py-0.5 rounded-md">19</span>
+      <span class="text-xs text-blue-200">天</span>
+    </div>
+    <h1 class="text-2xl font-black leading-tight mb-1">
+      云南<span class="text-warm-400">高考家长群</span>
+    </h1>
+    <p class="text-sm text-blue-200 font-medium mb-1">
+      已有 <span class="text-white font-bold text-lg">2,847</span> 位家长加入
+    </p>
+    <p class="text-xs text-blue-300/80 mb-4">免费 · 按地州分群 · 专家在线答疑</p>
+    <a href="#join" class="block w-full py-3.5 bg-warm-500 text-white text-center rounded-xl font-bold text-sm shadow-lg shadow-black/20 active:scale-[0.98] transition-transform">
+      <i class="fab fa-weixin mr-1.5"></i>免费加入家长群
+    </a>
+    <div class="flex items-center gap-3 mt-3">
+      <div class="flex -space-x-2">
+        <div class="w-7 h-7 rounded-full bg-blue-300 border-2 border-brand-700 flex items-center justify-center text-[10px] font-bold text-brand-800">李</div>
+        <div class="w-7 h-7 rounded-full bg-warm-300 border-2 border-brand-700 flex items-center justify-center text-[10px] font-bold text-amber-800">王</div>
+        <div class="w-7 h-7 rounded-full bg-pink-300 border-2 border-brand-700 flex items-center justify-center text-[10px] font-bold text-pink-800">张</div>
+      </div>
+      <span class="text-xs text-blue-200"><span class="text-white font-medium">曲靖李家长</span> 刚刚加入</span>
+    </div>
+  </div>
+</section>
+
+<!-- ========== HERO (桌面版) ========== -->
+<section class="pt-28 pb-16 md:pt-36 md:pb-20 relative overflow-hidden hidden lg:block" style="background:linear-gradient(135deg,#eff6ff 0%,#ffffff 40%,#fef3c7 100%)">
   <!-- 装饰背景 -->
   <div class="absolute top-0 right-0 w-96 h-96 bg-brand-100 rounded-full opacity-20 -translate-y-1/2 translate-x-1/2"></div>
   <div class="absolute bottom-0 left-0 w-72 h-72 bg-warm-100 rounded-full opacity-30 translate-y-1/2 -translate-x-1/4"></div>
