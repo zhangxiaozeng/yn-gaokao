@@ -7,13 +7,13 @@
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script>
-// 缓存刷新：没有v参数时加上今日日期作为版本号，绕过微信缓存
+// 强制版本控制：每次更新时递增 BUILD_ID，确保微信浏览器加载最新页面
 (function(){
+  var BUILD_ID = 6;
   var p = new URLSearchParams(location.search);
-  if (!p.get('v')) {
-    var d = new Date();
-    var ver = '' + d.getFullYear() + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0');
-    location.replace(location.pathname + '?v=' + ver + location.hash);
+  var cur = parseInt(p.get('v'), 10);
+  if (cur !== BUILD_ID) {
+    location.replace(location.pathname + '?v=' + BUILD_ID + location.hash);
   }
 })();
 </script>
