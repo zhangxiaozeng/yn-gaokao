@@ -7,13 +7,19 @@
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script>
-// 强制版本控制：每次更新时递增 BUILD_ID，确保微信浏览器加载最新页面
+// 版本控制 + 随机参数绕过微信/CDN缓存
 (function(){
   var BUILD_ID = '6';
   var p = new URLSearchParams(location.search);
-  var cur = p.get('ver') || p.get('v') || '';
-  if (cur !== BUILD_ID) {
-    location.replace(location.pathname + '?ver=' + BUILD_ID + location.hash);
+  var ver = p.get('ver');
+  var t = p.get('_t');
+  var now = Date.now();
+  if (ver !== BUILD_ID) {
+    location.replace(location.pathname + '?ver=' + BUILD_ID + '&_t=' + now + location.hash);
+    return;
+  }
+  if (!t) {
+    location.replace(location.pathname + '?ver=' + BUILD_ID + '&_t=' + now + location.hash);
   }
 })();
 </script>
