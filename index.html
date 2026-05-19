@@ -11,7 +11,7 @@
 (function(){
   var BUILD_ID = '6';
   var p = new URLSearchParams(location.search);
-  var cur = p.get('ver') || '';
+  var cur = p.get('ver') || p.get('v') || '';
   if (cur !== BUILD_ID) {
     location.replace(location.pathname + '?ver=' + BUILD_ID + location.hash);
   }
