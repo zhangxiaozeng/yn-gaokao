@@ -3,424 +3,50 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>云南高考查学校 | 你的分数能上什么大学？</title>
-<meta name="description" content="输入高考分数，一键查询你能报哪些大学。涵盖全国在滇招生院校录取数据，分冲刺/稳妥/保底三档推荐。">
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<script>
-tailwind.config = {
-  theme: {
-    extend: {
-      colors: {
-        primary: { DEFAULT: '#2563eb', 50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a' },
-        accent: { DEFAULT: '#f59e0b', 50: '#fffbeb', 600: '#d97706' },
-        success: '#059669',
-        danger: '#dc2626',
-      }
-    }
-  }
-}
-</script>
+<title>云南大雁升学 - 查学校</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
-body { font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif; background: #f9fafb; color: #1f2937; }
-.fade-in { animation: fadeIn 0.4s ease both; }
-@keyframes fadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
-.result-card { transition: all 0.2s; }
-.result-card:hover { background: #f9fafb; }
-input[type="range"] { -webkit-appearance: none; appearance: none; height: 5px; border-radius: 3px; outline: none; background: #e5e7eb; }
-input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #2563eb; cursor: pointer; box-shadow: 0 1px 4px rgba(37,99,235,0.3); }
-input[type="number"]::-webkit-inner-spin-button { opacity: 1; }
+body { font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: linear-gradient(135deg, #1e40af, #1e3a8a); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.card { background: white; border-radius: 20px; padding: 40px 30px; text-align: center; max-width: 360px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+.icon { width: 72px; height: 72px; border-radius: 20px; background: #eff6ff; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
+.icon svg { width: 36px; height: 36px; }
+h1 { font-size: 22px; font-weight: 800; color: #111827; margin-bottom: 8px; }
+p { font-size: 14px; color: #6b7280; line-height: 1.6; margin-bottom: 24px; }
+.btn { display: block; width: 100%; padding: 14px; border-radius: 12px; font-size: 16px; font-weight: 700; text-decoration: none; transition: all 0.2s; }
+.btn-wechat { background: #07c160; color: white; margin-bottom: 12px; }
+.btn-wechat:hover { background: #06ad56; }
+.btn-outline { background: #f3f4f6; color: #374151; }
+.btn-outline:hover { background: #e5e7eb; }
+.hint { font-size: 12px; color: #9ca3af; margin-top: 16px; }
 </style>
 </head>
 <body>
-
-<!-- ===== NAV ===== -->
-<nav class="bg-white/95 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
-  <div class="max-w-5xl mx-auto px-5 h-16 flex items-center justify-between">
-    <a href="index.html" class="flex items-center gap-2.5 text-primary font-bold text-lg tracking-tight">
-      <i class="fas fa-graduation-cap text-xl"></i>
-      <span>云南高考指南</span>
-    </a>
-    <div class="flex items-center gap-6 text-sm">
-      <a href="index.html" class="text-gray-400 hover:text-primary transition-colors">各地州群</a>
-      <span class="text-primary font-semibold border-b-2 border-primary pb-0.5">查学校</span>
-    </div>
+<div class="card">
+  <div class="icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+      <path d="M6 12v5c3 2 9 2 12 0v-5"/>
+    </svg>
   </div>
-</nav>
-
-<!-- ===== HERO ===== -->
-<section class="py-16 md:py-20 bg-gradient-to-b from-primary-50/60 via-white to-white">
-  <div class="max-w-3xl mx-auto px-5 text-center">
-    <span class="text-primary font-medium text-xs tracking-widest uppercase">TOOL</span>
-    <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mt-3 tracking-tight">你的分数能上什么学校？</h1>
-    <p class="text-gray-400 mt-3">输入分数 + 科类，一键匹配全国在滇招生院校</p>
-  </div>
-</section>
-
-<!-- ===== TOOL ===== -->
-<section class="max-w-3xl mx-auto px-5 -mt-6">
-  <!-- 查询卡片 -->
-  <div class="bg-white rounded-2xl border border-gray-100 p-6 md:p-8 mb-8 fade-in shadow-sm">
-    <div class="grid md:grid-cols-3 gap-4 mb-6">
-      <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-2">科类</label>
-        <div class="flex gap-2">
-          <button id="btnLiKe" onclick="setSubject('like')" class="flex-1 py-3 px-4 rounded-xl border-2 font-semibold text-sm transition-all bg-primary text-white border-primary">理科</button>
-          <button id="btnWenKe" onclick="setSubject('wenke')" class="flex-1 py-3 px-4 rounded-xl border-2 font-semibold text-sm transition-all bg-white text-gray-600 border-gray-200">文科</button>
-        </div>
-      </div>
-      <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-2">高考分数</label>
-        <div class="relative">
-          <input id="scoreInput" type="number" min="0" max="750" value="500" oninput="syncScore(this.value)" class="w-full py-3 px-4 rounded-xl border-2 border-gray-200 font-bold text-xl text-center focus:border-primary focus:ring-2 focus:ring-primary-50 outline-none transition-all" style="-moz-appearance:textfield">
-        </div>
-      </div>
-      <div class="flex items-end">
-        <button onclick="search()" class="w-full py-3 px-6 rounded-xl font-semibold text-base bg-primary text-white hover:bg-primary-700 transition-all shadow-sm active:scale-[0.98]">
-          <i class="fas fa-search mr-2"></i>查询
-        </button>
-      </div>
-    </div>
-
-    <!-- 分数滑块 -->
-    <div class="px-1">
-      <input type="range" id="scoreSlider" min="0" max="750" value="500" oninput="syncScore(this.value)" class="w-full">
-      <div class="flex justify-between text-xs text-gray-400 mt-1.5 px-1">
-        <span>0</span><span>一本线 <span id="yibenLine" class="font-semibold text-primary">505</span></span><span>750</span>
-      </div>
-    </div>
-
-    <!-- 快捷分数 -->
-    <div class="flex flex-wrap gap-2 mt-5">
-      <span class="text-xs text-gray-400 mr-1 leading-7">快捷选分：</span>
-      <button onclick="quickScore(600)" class="px-3 py-1.5 text-xs rounded-lg border border-gray-200 text-gray-500 hover:border-primary hover:text-primary transition-colors">600</button>
-      <button onclick="quickScore(550)" class="px-3 py-1.5 text-xs rounded-lg border border-gray-200 text-gray-500 hover:border-primary hover:text-primary transition-colors">550</button>
-      <button onclick="quickScore(500)" class="px-3 py-1.5 text-xs rounded-lg border border-gray-200 text-gray-500 hover:border-primary hover:text-primary transition-colors">500</button>
-      <button onclick="quickScore(470)" class="px-3 py-1.5 text-xs rounded-lg border border-gray-200 text-gray-500 hover:border-primary hover:text-primary transition-colors">470</button>
-      <button onclick="quickScore(450)" class="px-3 py-1.5 text-xs rounded-lg border border-gray-200 text-gray-500 hover:border-primary hover:text-primary transition-colors">450</button>
-      <button onclick="quickScore(420)" class="px-3 py-1.5 text-xs rounded-lg border border-gray-200 text-gray-500 hover:border-primary hover:text-primary transition-colors">420</button>
-      <button onclick="quickScore(400)" class="px-3 py-1.5 text-xs rounded-lg border border-gray-200 text-gray-500 hover:border-primary hover:text-primary transition-colors">400</button>
-      <button onclick="quickScore(350)" class="px-3 py-1.5 text-xs rounded-lg border border-gray-200 text-gray-500 hover:border-primary hover:text-primary transition-colors">350</button>
-    </div>
-  </div>
-
-  <!-- 加载中 -->
-  <div id="loading" class="hidden text-center py-16">
-    <i class="fas fa-spinner fa-spin text-3xl text-primary"></i>
-    <p class="text-gray-400 mt-3 text-sm">正在匹配院校...</p>
-  </div>
-
-  <!-- 结果概览 -->
-  <div id="resultSummary" class="hidden mb-6 fade-in">
-    <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-      <div class="text-center mb-5">
-        <span class="text-3xl font-bold text-gray-900" id="displayScore">500</span>
-        <span class="text-gray-400 text-base">分</span>
-        <span class="ml-2 px-3 py-0.5 rounded-full text-xs font-medium" id="displaySubject"></span>
-      </div>
-      <div class="grid grid-cols-3 gap-3 text-center">
-        <div class="p-3 rounded-xl bg-rose-50 border border-rose-100">
-          <div class="text-xl font-bold text-rose-500" id="countChongci">0</div>
-          <div class="text-xs text-gray-400 mt-0.5">冲刺</div>
-        </div>
-        <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-100">
-          <div class="text-xl font-bold text-emerald-500" id="countWentuo">0</div>
-          <div class="text-xs text-gray-400 mt-0.5">稳妥</div>
-        </div>
-        <div class="p-3 rounded-xl bg-blue-50 border border-blue-100">
-          <div class="text-xl font-bold text-blue-500" id="countBaodi">0</div>
-          <div class="text-xs text-gray-400 mt-0.5">保底</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 结果列表 -->
-  <div id="resultArea" class="hidden mb-12"></div>
-
-  <!-- 免责 -->
-  <div class="text-center mb-8 text-xs text-gray-400">
-    <i class="fas fa-info-circle mr-1"></i>
-    数据仅供参考，实际录取以云南省招生考试院公布为准
-  </div>
-</section>
-
-<!-- ===== FOOTER ===== -->
-<footer class="border-t border-gray-100 py-10">
-  <div class="max-w-5xl mx-auto px-5 text-center text-sm text-gray-400">
-    <p>数据来源：云南省招生考试院及各院校官网</p>
-    <p class="mt-1">&copy; 2026 云南高考指南 · 公益查询工具</p>
-  </div>
-</footer>
-
+  <h1>云南大雁升学</h1>
+  <p>查学校 · 填志愿 · 上名校<br>点击下方按钮打开小程序</p>
+  <a href="javascript:void(0)" onclick="openMiniApp()" class="btn btn-wechat">
+    <svg viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px;display:inline-block;vertical-align:middle;margin-right:6px;">
+      <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.045.246.246 0 0 0 .242-.245c0-.06-.024-.12-.04-.177l-.325-1.233a.492.492 0 0 1 .178-.553C23.028 18.333 24 16.592 24 14.628c0-3.299-3.063-5.77-7.062-5.77zm-2.18 3.452c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.36 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982z"/>
+    </svg>
+    在微信中打开
+  </a>
+  <p class="hint">本工具需在微信内打开才能使用</p>
+</div>
 <script>
-// ===== 当前状态 =====
-let subject = 'like';
-
-// ===== 分数线参考 (2024年云南) =====
-const LINES = {
-  like: { yiben: 505, erben: 420, zhuanke: 200 },
-  wenke: { yiben: 530, erben: 465, zhuanke: 200 }
-};
-
-// ===== 院校数据库 =====
-const SCHOOLS = [
-  { name:'清华大学', city:'北京', type:'985/211', tag:'顶尖', like:[685,750], wenke:[660,750] },
-  { name:'北京大学', city:'北京', type:'985/211', tag:'顶尖', like:[680,750], wenke:[655,750] },
-  { name:'复旦大学', city:'上海', type:'985/211', tag:'顶尖', like:[665,685], wenke:[645,660] },
-  { name:'上海交通大学', city:'上海', type:'985/211', tag:'顶尖', like:[668,685], wenke:[640,655] },
-  { name:'浙江大学', city:'浙江', type:'985/211', tag:'顶尖', like:[660,680], wenke:[635,650] },
-  { name:'中国科学技术大学', city:'安徽', type:'985/211', tag:'顶尖', like:[665,685], wenke:[620,640] },
-  { name:'南京大学', city:'江苏', type:'985/211', tag:'顶尖', like:[655,675], wenke:[630,645] },
-  { name:'中国人民大学', city:'北京', type:'985/211', tag:'顶尖', like:[655,675], wenke:[640,655] },
-  { name:'武汉大学', city:'湖北', type:'985/211', tag:'985', like:[630,660], wenke:[615,635] },
-  { name:'华中科技大学', city:'湖北', type:'985/211', tag:'985', like:[625,655], wenke:[600,620] },
-  { name:'西安交通大学', city:'陕西', type:'985/211', tag:'985', like:[635,660], wenke:[605,625] },
-  { name:'中山大学', city:'广东', type:'985/211', tag:'985', like:[625,650], wenke:[615,635] },
-  { name:'哈尔滨工业大学', city:'黑龙江', type:'985/211', tag:'985', like:[630,655], wenke:[590,610] },
-  { name:'北京航空航天大学', city:'北京', type:'985/211', tag:'985', like:[650,670], wenke:[600,620] },
-  { name:'北京理工大学', city:'北京', type:'985/211', tag:'985', like:[635,655], wenke:[595,615] },
-  { name:'南开大学', city:'天津', type:'985/211', tag:'985', like:[640,660], wenke:[620,640] },
-  { name:'同济大学', city:'上海', type:'985/211', tag:'985', like:[645,665], wenke:[610,630] },
-  { name:'厦门大学', city:'福建', type:'985/211', tag:'985', like:[620,645], wenke:[610,630] },
-  { name:'四川大学', city:'四川', type:'985/211', tag:'985', like:[610,640], wenke:[600,620] },
-  { name:'电子科技大学', city:'四川', type:'985/211', tag:'985', like:[620,645], wenke:[570,590] },
-  { name:'重庆大学', city:'重庆', type:'985/211', tag:'985', like:[605,630], wenke:[590,610] },
-  { name:'中南大学', city:'湖南', type:'985/211', tag:'985', like:[610,635], wenke:[590,610] },
-  { name:'湖南大学', city:'湖南', type:'985/211', tag:'985', like:[605,630], wenke:[585,605] },
-  { name:'吉林大学', city:'吉林', type:'985/211', tag:'985', like:[595,625], wenke:[580,600] },
-  { name:'山东大学', city:'山东', type:'985/211', tag:'985', like:[605,630], wenke:[595,615] },
-  { name:'华南理工大学', city:'广东', type:'985/211', tag:'985', like:[610,635], wenke:[580,600] },
-  { name:'大连理工大学', city:'辽宁', type:'985/211', tag:'985', like:[600,625], wenke:[570,590] },
-  { name:'西北工业大学', city:'陕西', type:'985/211', tag:'985', like:[610,635], wenke:[575,595] },
-  { name:'兰州大学', city:'甘肃', type:'985/211', tag:'985', like:[580,610], wenke:[570,590] },
-  { name:'云南大学', city:'昆明', type:'211', tag:'省内', like:[550,590], wenke:[570,600] },
-  { name:'昆明理工大学', city:'昆明', type:'一本', tag:'省内', like:[510,560], wenke:[530,560] },
-  { name:'云南师范大学', city:'昆明', type:'一本', tag:'省内师范', like:[505,545], wenke:[535,565] },
-  { name:'昆明医科大学', city:'昆明', type:'一本', tag:'省内医学', like:[530,580], wenke:[540,570] },
-  { name:'云南财经大学', city:'昆明', type:'一本', tag:'省内财经', like:[500,540], wenke:[530,560] },
-  { name:'云南农业大学', city:'昆明', type:'一本', tag:'省内', like:[490,530], wenke:[520,550] },
-  { name:'云南民族大学', city:'昆明', type:'一本', tag:'省内', like:[490,530], wenke:[525,555] },
-  { name:'西南林业大学', city:'昆明', type:'一本', tag:'省内', like:[485,525], wenke:[520,550] },
-  { name:'云南中医药大学', city:'昆明', type:'一本', tag:'省内中医', like:[505,545], wenke:[535,560] },
-  { name:'大理大学', city:'大理', type:'一本', tag:'省内', like:[485,525], wenke:[520,550] },
-  { name:'西南交通大学', city:'四川', type:'211', tag:'交通', like:[590,620], wenke:[560,580] },
-  { name:'西南财经大学', city:'四川', type:'211', tag:'财经', like:[600,630], wenke:[595,615] },
-  { name:'西南大学', city:'重庆', type:'211', tag:'师范', like:[580,610], wenke:[575,595] },
-  { name:'贵州大学', city:'贵州', type:'211', tag:'综合', like:[530,565], wenke:[550,575] },
-  { name:'广西大学', city:'广西', type:'211', tag:'综合', like:[520,555], wenke:[545,570] },
-  { name:'北京邮电大学', city:'北京', type:'211', tag:'通信', like:[615,640], wenke:[575,595] },
-  { name:'西安电子科技大学', city:'陕西', type:'211', tag:'电子', like:[600,630], wenke:[560,580] },
-  { name:'武汉理工大学', city:'湖北', type:'211', tag:'材料', like:[585,615], wenke:[555,575] },
-  { name:'南京理工大学', city:'江苏', type:'211', tag:'理工', like:[590,620], wenke:[555,575] },
-  { name:'河海大学', city:'江苏', type:'211', tag:'水利', like:[570,600], wenke:[555,575] },
-  { name:'南昌大学', city:'江西', type:'211', tag:'综合', like:[540,575], wenke:[550,575] },
-  { name:'昆明学院', city:'昆明', type:'二本', tag:'省内', like:[440,490], wenke:[480,520] },
-  { name:'曲靖师范学院', city:'曲靖', type:'二本', tag:'省内师范', like:[435,480], wenke:[475,515] },
-  { name:'玉溪师范学院', city:'玉溪', type:'二本', tag:'省内师范', like:[430,475], wenke:[470,510] },
-  { name:'楚雄师范学院', city:'楚雄', type:'二本', tag:'省内师范', like:[425,470], wenke:[465,505] },
-  { name:'红河学院', city:'蒙自', type:'二本', tag:'省内', like:[420,465], wenke:[465,505] },
-  { name:'文山学院', city:'文山', type:'二本', tag:'省内', like:[420,460], wenke:[465,500] },
-  { name:'普洱学院', city:'普洱', type:'二本', tag:'省内', like:[420,460], wenke:[465,500] },
-  { name:'保山学院', city:'保山', type:'二本', tag:'省内', like:[420,460], wenke:[465,500] },
-  { name:'昭通学院', city:'昭通', type:'二本', tag:'省内', like:[420,460], wenke:[465,500] },
-  { name:'丽江师范学院', city:'丽江', type:'二本', tag:'省内', like:[420,455], wenke:[465,495] },
-  { name:'滇西科技师范学院', city:'临沧', type:'二本', tag:'省内', like:[420,455], wenke:[465,495] },
-  { name:'云南工商学院', city:'昆明', type:'二本', tag:'民办', like:[420,445], wenke:[465,490] },
-  { name:'云南经济管理学院', city:'昆明', type:'二本', tag:'民办', like:[420,440], wenke:[465,485] },
-  { name:'昆明医科大学海源学院', city:'昆明', type:'二本', tag:'民办医学', like:[430,470], wenke:[470,505] },
-  { name:'云南大学滇池学院', city:'昆明', type:'二本', tag:'民办', like:[420,450], wenke:[465,495] },
-  { name:'昆明理工大学津桥学院', city:'昆明', type:'二本', tag:'民办', like:[420,445], wenke:[465,490] },
-  { name:'云南师范大学商学院', city:'昆明', type:'二本', tag:'民办', like:[420,445], wenke:[465,490] },
-  { name:'云南艺术学院', city:'昆明', type:'二本', tag:'艺术', like:[420,460], wenke:[465,500] },
-  { name:'云南警官学院', city:'昆明', type:'二本', tag:'公安', like:[460,510], wenke:[500,540] },
-  { name:'成都理工大学', city:'四川', type:'一本', tag:'省外', like:[545,575], wenke:[555,575] },
-  { name:'四川师范大学', city:'四川', type:'二本', tag:'省外师范', like:[490,535], wenke:[530,560] },
-  { name:'重庆邮电大学', city:'重庆', type:'二本', tag:'省外通信', like:[520,560], wenke:[525,555] },
-  { name:'重庆工商大学', city:'重庆', type:'二本', tag:'省外财经', like:[490,530], wenke:[520,550] },
-  { name:'西安邮电大学', city:'陕西', type:'二本', tag:'省外', like:[510,545], wenke:[510,540] },
-  { name:'桂林电子科技大学', city:'广西', type:'二本', tag:'省外电子', like:[490,530], wenke:[500,530] },
-  { name:'桂林理工大学', city:'广西', type:'二本', tag:'省外', like:[450,490], wenke:[490,520] },
-  { name:'广西科技大学', city:'广西', type:'二本', tag:'省外', like:[440,480], wenke:[485,515] },
-  { name:'贵州财经大学', city:'贵州', type:'二本', tag:'省外财经', like:[460,500], wenke:[500,530] },
-  { name:'贵州医科大学', city:'贵州', type:'二本', tag:'省外医学', like:[500,545], wenke:[520,550] },
-  { name:'遵义医科大学', city:'贵州', type:'二本', tag:'省外医学', like:[490,530], wenke:[515,545] },
-  { name:'昆明冶金高等专科学校', city:'昆明', type:'专科', tag:'省内', like:[350,420], wenke:[400,465] },
-  { name:'云南交通职业技术学院', city:'昆明', type:'专科', tag:'省内', like:[360,420], wenke:[410,465] },
-  { name:'云南国土资源职业学院', city:'昆明', type:'专科', tag:'省内', like:[300,400], wenke:[350,440] },
-  { name:'云南机电职业技术学院', city:'昆明', type:'专科', tag:'省内', like:[300,400], wenke:[350,440] },
-  { name:'云南农业职业技术学院', city:'昆明', type:'专科', tag:'省内', like:[280,380], wenke:[350,430] },
-  { name:'云南林业职业技术学院', city:'昆明', type:'专科', tag:'省内', like:[280,380], wenke:[350,430] },
-  { name:'云南旅游职业学院', city:'昆明', type:'专科', tag:'省内', like:[260,360], wenke:[330,420] },
-  { name:'曲靖医学高等专科学校', city:'曲靖', type:'专科', tag:'省内医学', like:[380,430], wenke:[430,470] },
-  { name:'楚雄医药高等专科学校', city:'楚雄', type:'专科', tag:'省内医学', like:[370,420], wenke:[420,460] },
-  { name:'保山中医药高等专科学校', city:'保山', type:'专科', tag:'省内医学', like:[360,410], wenke:[410,450] },
-  { name:'德宏师范高等专科学校', city:'德宏', type:'专科', tag:'省内', like:[250,350], wenke:[320,410] },
-  { name:'丽江文化旅游学院', city:'丽江', type:'二本', tag:'民办', like:[420,445], wenke:[465,490] },
-];
-
-// ===== UI 函数 =====
-function setSubject(val) {
-  subject = val;
-  const likeBtn = document.getElementById('btnLiKe');
-  const wenkeBtn = document.getElementById('btnWenKe');
-  if (val === 'like') {
-    likeBtn.className = 'flex-1 py-3 px-4 rounded-xl border-2 font-semibold text-sm transition-all bg-primary text-white border-primary';
-    wenkeBtn.className = 'flex-1 py-3 px-4 rounded-xl border-2 font-semibold text-sm transition-all bg-white text-gray-600 border-gray-200';
-    document.getElementById('yibenLine').textContent = LINES.like.yiben;
+function openMiniApp() {
+  var ua = navigator.userAgent.toLowerCase();
+  if (ua.indexOf('micromessenger') !== -1) {
+    window.location.href = '#小程序://云南大雁升学/HXr9GoGHODYnEUe';
   } else {
-    likeBtn.className = 'flex-1 py-3 px-4 rounded-xl border-2 font-semibold text-sm transition-all bg-white text-gray-600 border-gray-200';
-    wenkeBtn.className = 'flex-1 py-3 px-4 rounded-xl border-2 font-semibold text-sm transition-all bg-primary text-white border-primary';
-    document.getElementById('yibenLine').textContent = LINES.wenke.yiben;
+    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#f3f4f6;padding:20px;font-family:sans-serif"><div style="background:white;border-radius:20px;padding:40px 30px;text-align:center;max-width:360px;box-shadow:0 10px 40px rgba(0,0,0,0.1)"><div style="font-size:48px;margin-bottom:16px">📱</div><h1 style="font-size:20px;font-weight:800;color:#111;margin-bottom:8px">请使用微信打开</h1><p style="font-size:14px;color:#6b7280;line-height:1.6">1. 截图保存此页面<br>2. 打开微信扫一扫<br>3. 从相册选择截图识别</p></div></div>';
   }
 }
-
-function syncScore(val) {
-  document.getElementById('scoreInput').value = val;
-  document.getElementById('scoreSlider').value = val;
-}
-
-function quickScore(val) {
-  syncScore(val);
-  search();
-}
-
-// ===== 核心查询 =====
-function search() {
-  const score = parseInt(document.getElementById('scoreInput').value);
-  if (!score || score < 0 || score > 750) {
-    alert('请输入有效分数（0-750分）');
-    return;
-  }
-
-  document.getElementById('loading').classList.remove('hidden');
-  document.getElementById('resultSummary').classList.add('hidden');
-  document.getElementById('resultArea').classList.add('hidden');
-
-  setTimeout(() => {
-    const lines = LINES[subject];
-    const scoreField = subject;
-
-    const matched = [];
-    SCHOOLS.forEach(s => {
-      const range = s[scoreField];
-      if (!range) return;
-      const [min, max] = range;
-      if (score >= min - 15 && score <= max + 5) {
-        let level = 'baodi';
-        const diff = score - (min + max) / 2;
-        if (diff > 8) level = 'wentuo';
-        if (diff < -8) level = 'chongci';
-        if (score >= max + 3) level = 'baodi';
-        matched.push({
-          name: s.name, city: s.city, type: s.type, tag: s.tag,
-          level: level, minScore: min, maxScore: max,
-          avgScore: Math.round((min + max) / 2),
-          diff: score - Math.round((min + max) / 2)
-        });
-      }
-    });
-
-    const order = { chongci: 0, wentuo: 1, baodi: 2 };
-    matched.sort((a, b) => {
-      if (order[a.level] !== order[b.level]) return order[a.level] - order[b.level];
-      return Math.abs(a.diff) - Math.abs(b.diff);
-    });
-
-    renderResults(score, matched);
-    document.getElementById('loading').classList.add('hidden');
-  }, 400);
-}
-
-function renderResults(score, matched) {
-  const chongci = matched.filter(m => m.level === 'chongci');
-  const wentuo = matched.filter(m => m.level === 'wentuo');
-  const baodi = matched.filter(m => m.level === 'baodi');
-
-  document.getElementById('displayScore').textContent = score;
-  const subjName = subject === 'like' ? '理科' : '文科';
-  const subjEl = document.getElementById('displaySubject');
-  subjEl.textContent = subjName;
-  subjEl.className = 'ml-2 px-3 py-0.5 rounded-full text-xs font-medium ' +
-    (subject === 'like' ? 'bg-primary-50 text-primary' : 'bg-rose-50 text-rose-600');
-
-  document.getElementById('countChongci').textContent = chongci.length;
-  document.getElementById('countWentuo').textContent = wentuo.length;
-  document.getElementById('countBaodi').textContent = baodi.length;
-  document.getElementById('resultSummary').classList.remove('hidden');
-
-  const area = document.getElementById('resultArea');
-  let html = '';
-  if (chongci.length > 0) html += renderLevel(chongci, 'chongci', '冲刺院校', '分数略低于往年录取线，可以冲一冲');
-  if (wentuo.length > 0) html += renderLevel(wentuo, 'wentuo', '稳妥院校', '分数匹配度高，录取概率较大');
-  if (baodi.length > 0) html += renderLevel(baodi, 'baodi', '保底院校', '分数高于往年录取线，基本稳上');
-
-  if (matched.length === 0) {
-    html = `
-      <div class="bg-white rounded-2xl border border-gray-100 p-12 text-center shadow-sm">
-        <i class="fas fa-search text-4xl text-gray-200 mb-4"></i>
-        <p class="text-gray-500 font-medium">未匹配到院校</p>
-        <p class="text-gray-400 text-sm mt-1">试试调整分数</p>
-      </div>
-    `;
-  }
-  area.innerHTML = html;
-  area.classList.remove('hidden');
-}
-
-function renderLevel(schools, level, title, desc) {
-  const cfg = {
-    chongci: { bg: 'bg-rose-50', text: 'text-rose-600', dot: 'bg-rose-400', border: 'border-rose-100' },
-    wentuo: { bg: 'bg-emerald-50', text: 'text-emerald-600', dot: 'bg-emerald-400', border: 'border-emerald-100' },
-    baodi: { bg: 'bg-blue-50', text: 'text-blue-600', dot: 'bg-blue-400', border: 'border-blue-100' }
-  };
-  const c = cfg[level];
-
-  return `
-    <div class="mb-6 fade-in">
-      <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
-        <div class="px-5 py-4 border-b border-gray-50">
-          <div class="flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full ${c.dot}"></span>
-            <h3 class="font-semibold text-gray-900">${title}</h3>
-          </div>
-          <p class="text-xs text-gray-400 mt-0.5 ml-4">${desc}</p>
-        </div>
-        <div class="divide-y divide-gray-50">
-          ${schools.map(s => `
-            <div class="result-card px-5 py-3.5 flex items-center justify-between">
-              <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-2">
-                  <span class="font-medium text-gray-900 text-sm truncate">${s.name}</span>
-                  <span class="shrink-0 px-1.5 py-0.5 text-[10px] rounded ${c.bg} ${c.text} font-medium">${ {chongci:'冲刺', wentuo:'稳妥', baodi:'保底'}[level] }</span>
-                </div>
-                <div class="flex items-center gap-2 mt-1 text-xs text-gray-400">
-                  <span>${s.city}</span>
-                  <span class="w-1 h-1 rounded-full bg-gray-300"></span>
-                  <span>${s.type}</span>
-                  ${s.tag ? `<span class="w-1 h-1 rounded-full bg-gray-300"></span><span>${s.tag}</span>` : ''}
-                </div>
-              </div>
-              <div class="text-right ml-4 shrink-0">
-                <div class="text-sm font-semibold text-gray-900">${s.avgScore}</div>
-                <div class="text-xs text-gray-400">均分</div>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-// ===== Enter key =====
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('scoreInput').addEventListener('keydown', e => {
-    if (e.key === 'Enter') search();
-  });
-  search();
-});
 </script>
 </body>
 </html>
