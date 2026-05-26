@@ -7,19 +7,17 @@
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script>
-// 版本控制 + 随机参数绕过微信/CDN缓存
+// 版本控制 + 随机参数绕过微信/CDN缓存（保留所有URL参数）
 (function(){
-  var BUILD_ID = '6';
-  var p = new URLSearchParams(location.search);
-  var ver = p.get('ver');
-  var t = p.get('_t');
+  var BUILD_ID = '7';
+  var params = new URLSearchParams(location.search);
+  var ver = params.get('ver');
+  var t = params.get('_t');
   var now = Date.now();
-  if (ver !== BUILD_ID) {
-    location.replace(location.pathname + '?ver=' + BUILD_ID + '&_t=' + now + location.hash);
-    return;
-  }
-  if (!t) {
-    location.replace(location.pathname + '?ver=' + BUILD_ID + '&_t=' + now + location.hash);
+  if (ver !== BUILD_ID || !t) {
+    params.set('ver', BUILD_ID);
+    params.set('_t', now);
+    location.replace(location.pathname + '?' + params.toString() + location.hash);
   }
 })();
 </script>
@@ -29,6 +27,8 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
 <script src="https://cdn.tailwindcss.com?ver=6"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css?ver=6">
+<script src="owner-config.js?ver=1"></script>
+<script src="cloud-config.js?ver=7"></script>
 <script>
 tailwind.config = {
   theme: {
@@ -86,6 +86,93 @@ details.benefit-card summary { list-style:none; }
 </head>
 <body>
 
+<!-- ========== 管理面板（首次打开 / 无二维码时显示） ========== -->
+<div id="setupMode" class="hidden min-h-screen bg-gray-50">
+  <div class="max-w-lg mx-auto px-5 py-10">
+    <div class="text-center mb-8">
+      <div class="w-16 h-16 rounded-2xl bg-brand-700 flex items-center justify-center mx-auto mb-4 shadow-lg">
+        <i class="fas fa-qrcode text-white text-2xl"></i>
+      </div>
+      <h1 class="text-2xl font-black text-gray-900">云南高考指南 · 管理后台</h1>
+      <p class="text-sm text-gray-400 mt-1">上传你的微信二维码，生成分享链接</p>
+    </div>
+
+    <!-- 步骤条 -->
+    <div class="flex items-center gap-2 mb-8">
+      <div class="flex-1 text-center">
+        <div class="w-8 h-8 rounded-full bg-brand-700 text-white text-sm font-bold flex items-center justify-center mx-auto mb-1">1</div>
+        <div class="text-xs text-gray-500">上传二维码</div>
+      </div>
+      <div class="flex-1 border-t border-gray-300 mt-[-20px]"></div>
+      <div class="flex-1 text-center">
+        <div class="w-8 h-8 rounded-full bg-gray-200 text-gray-500 text-sm font-bold flex items-center justify-center mx-auto mb-1" id="step2">2</div>
+        <div class="text-xs text-gray-400" id="step2text">预览确认</div>
+      </div>
+      <div class="flex-1 border-t border-gray-300 mt-[-20px]"></div>
+      <div class="flex-1 text-center">
+        <div class="w-8 h-8 rounded-full bg-gray-200 text-gray-500 text-sm font-bold flex items-center justify-center mx-auto mb-1" id="step3">3</div>
+        <div class="text-xs text-gray-400" id="step3text">复制链接 · 去发帖</div>
+      </div>
+    </div>
+
+    <!-- 上传区 -->
+    <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm mb-4">
+      <h2 class="font-bold text-gray-900 mb-4">① 上传微信二维码</h2>
+      <div id="dropZone" class="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center hover:border-brand-300 transition-colors cursor-pointer" onclick="document.getElementById('fileInput').click()">
+        <i class="fas fa-cloud-upload-alt text-3xl text-gray-300 mb-3"></i>
+        <p class="text-gray-500 font-medium">点击选择二维码图片</p>
+        <p class="text-xs text-gray-400 mt-1">清晰的微信二维码截图 (JPG/PNG)</p>
+      </div>
+      <input id="fileInput" type="file" accept="image/*" class="hidden" onchange="handleSetupFile(event)">
+
+      <div id="setupPreview" class="hidden mt-4 text-center">
+        <p class="text-sm font-medium text-gray-700 mb-2">预览</p>
+        <div class="w-36 h-36 mx-auto rounded-xl overflow-hidden border border-gray-200 shadow-sm">
+          <img id="setupPreviewImg" src="" alt="二维码预览" class="w-full h-full object-cover">
+        </div>
+        <button onclick="resetUpload()" class="mt-2 text-sm text-gray-400 hover:text-red-500 transition-colors">
+          <i class="fas fa-undo mr-1"></i>重新选择
+        </button>
+      </div>
+    </div>
+
+    <!-- 链接区 -->
+    <div id="linkArea" class="hidden bg-white rounded-2xl border border-gray-100 p-6 shadow-sm mb-4">
+      <h2 class="font-bold text-gray-900 mb-4">② 你的分享链接</h2>
+      <p class="text-sm text-gray-500 mb-3">把链接发到小红书、抖音、朋友圈，家长点开就能看到你的二维码。</p>
+      <div class="flex gap-2">
+        <input id="shareLink" type="text" readonly class="bg-gray-50 text-sm font-mono text-gray-600 flex-1 px-4 py-3 rounded-xl border border-gray-200" onclick="this.select()">
+        <button onclick="copyShareLink()" class="px-5 py-3 bg-green-600 text-white rounded-xl font-semibold text-sm hover:bg-green-700 transition-all shadow-sm shrink-0">
+          <i class="fas fa-copy mr-1"></i>复制
+        </button>
+      </div>
+      <div class="mt-4 p-4 bg-blue-50 rounded-xl text-sm text-blue-700">
+        <i class="fas fa-lightbulb mr-1.5"></i>
+        <strong>提示：</strong>二维码过期只需来这里上传新图片，链接保持不变。
+      </div>
+    </div>
+
+    <!-- 完成 -->
+    <div id="doneArea" class="hidden text-center">
+      <div class="bg-green-50 rounded-2xl border border-green-100 p-6 shadow-sm mb-4">
+        <i class="fas fa-check-circle text-green-500 text-3xl mb-2"></i>
+        <p class="font-bold text-gray-900">设置完成！</p>
+        <p class="text-sm text-gray-500 mt-1">用上面复制的链接去发帖引流</p>
+      </div>
+      <button onclick="previewLandingPage()" class="text-brand-700 text-sm hover:text-brand-800 underline">
+        <i class="fas fa-external-link-alt mr-1"></i>预览落地页效果
+      </button>
+      <span class="text-gray-300 mx-2">|</span>
+      <button onclick="resetAll()" class="text-gray-400 text-sm hover:text-red-500 transition-colors">
+        <i class="fas fa-trash-alt mr-1"></i>重新设置
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 落地页模式（二维码已配置） ========== -->
+<div id="landingMode">
+
 <!-- ========== NAV ========== -->
 <nav class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100">
   <div class="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
@@ -120,7 +207,7 @@ details.benefit-card summary { list-style:none; }
       云南<span class="text-warm-400">高考家长群</span>
     </h1>
     <p class="text-sm text-blue-200 font-medium mb-3">
-      已有 <span class="text-white font-bold text-lg">2,847</span> 位家长加入
+      已有 <span id="parentCountMobile" class="text-white font-bold text-lg">0</span> 位家长加入
     </p>
     <p class="text-xs text-blue-300/80 mb-5">免费 · 按地州分群 · 专家在线答疑</p>
     <a href="#join" class="block w-full py-3.5 bg-warm-500 text-white text-center rounded-xl font-bold text-sm shadow-lg shadow-black/20 active:scale-[0.98] transition-transform">
@@ -161,7 +248,7 @@ details.benefit-card summary { list-style:none; }
         <span class="text-brand-700">云南</span>高考家长群
       </h1>
       <p class="text-xl md:text-2xl text-gray-700 font-medium mb-2">
-        已有 <span class="text-brand-700 font-black text-2xl">2,847</span> 位家长加入
+        已有 <span id="parentCountDesktop" class="text-brand-700 font-black text-2xl">0</span> 位家长加入
       </p>
       <p class="text-base text-gray-500 mb-8 max-w-xl">
         免费加入对应地州群 · 获取本地化志愿填报指导 · 专家在线答疑
@@ -516,7 +603,7 @@ details.benefit-card summary { list-style:none; }
 
     <div class="mt-4 lg:mt-10 inline-block bg-white border border-gray-100 rounded-2xl p-4 lg:p-8 shadow-md hover:shadow-lg transition-all">
       <div class="w-36 h-36 mx-auto rounded-xl overflow-hidden border border-gray-200 shadow-sm">
-        <img src="二维码.jpg" alt="微信二维码" class="w-full h-full object-cover">
+        <img id="qrcode-main" src="二维码.jpg" alt="微信二维码" class="w-full h-full object-cover">
       </div>
       <p class="mt-4 font-semibold text-gray-800">扫码加入 · 备注地州+家长</p>
             <div class="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 text-sm rounded-lg border border-green-200">
@@ -578,7 +665,8 @@ details.benefit-card summary { list-style:none; }
 <footer class="py-10 bg-gray-900 text-gray-500">
   <div class="max-w-6xl mx-auto px-5 text-center text-sm">
     <p class="text-gray-400">致力于帮助云南考生科学填报志愿，不浪费每一分</p>
-    <p class="mt-1">&copy; 2026 云南高考指南</p>
+    <p class="mt-1"><p class="mt-1">&copy; 2026 云南高考指南</p>copy; 2026 云南高考指南</p>
+	    <p class="mt-3"><a href="?setup=1" class="text-gray-600 hover:text-gray-400 text-xs transition-colors"><i class="fas fa-cog mr-1"></i>管理</a></p>
   </div>
 </footer>
 
@@ -589,8 +677,9 @@ details.benefit-card summary { list-style:none; }
   </a>
 </div>
 
+</div> <!-- /landingMode -->
+
 <script>
-// ===== 云南16个地州 =====
 const CITIES = [
   { id:'kunming',  name:'昆明市', short:'昆明', badge:'省会',      students:'6.2万', icon:'fa-city',      color:'#2563eb' },
   { id:'qujing',   name:'曲靖市', short:'曲靖', badge:'教育强市',  students:'5.8万', icon:'fa-school',    color:'#059669' },
@@ -777,7 +866,7 @@ function showCity(cityId) {
         <p class="font-semibold text-gray-800 mb-1">加入 ${city.name} 家长群</p>
         <p class="text-sm text-gray-400 mb-4">扫码加微信 · 备注"${city.short}家长"即可进群</p>
         <div class="w-28 h-28 mx-auto rounded-xl overflow-hidden border border-gray-200 shadow-sm">
-          <img src="二维码.jpg" alt="微信二维码" class="w-full h-full object-cover">
+          <img id="qrcode-city-${city.id}" src="二维码.jpg" alt="微信二维码" class="w-full h-full object-cover">
         </div>
         <div class="mt-4 flex flex-wrap justify-center gap-3">
           <a href="#join" class="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-700 text-white rounded-xl text-sm font-semibold hover:bg-brand-800 transition-all shadow-sm">
@@ -794,6 +883,9 @@ function showCity(cityId) {
   document.title = `${city.name}高考家长群 | 云南高考志愿填报指导`;
   const meta = document.querySelector('meta[name="description"]');
   if (meta) meta.content = `${city.name}高考志愿填报指导，加入${city.name}家长交流群，获取本地化高考政策解读、志愿填报技巧和院校推荐。`;
+
+  // 加载城市专属二维码
+  loadCityQR(city.id);
 }
 
 function closeCityDetail() {
@@ -805,6 +897,36 @@ function closeCityDetail() {
   document.title = '云南高考家长群 · 已有数千位家长加入';
   const meta = document.querySelector('meta[name="description"]');
   if (meta) meta.content = '云南高考志愿填报指导，覆盖昆明、曲靖、大理、玉溪等16个地州。加入当地家长交流群，获取最新高考政策解读和志愿填报技巧。';
+}
+
+// ===== 加载城市专属二维码 =====
+async function loadCityQR(cityId) {
+  var img = document.getElementById('qrcode-city-' + cityId);
+  if (!img) return;
+  try {
+    var qr = await CloudStorage.getCityQR(cityId);
+    if (qr) img.src = qr;
+  } catch(e) {
+    // 保持默认图
+  }
+}
+
+// ===== 初始化城市二维码（批量加载） =====
+async function initCityQRs() {
+  try {
+    var data = await CloudStorage.readCityQRData();
+    if (!data || !data.cities) return;
+    // 给当前可见的城市二维码赋值
+    Object.keys(data.cities).forEach(function(id) {
+      var img = document.getElementById('qrcode-city-' + id);
+      if (img && data.cities[id]) img.src = data.cities[id];
+    });
+    // 主二维码
+    if (data.main) {
+      var mainImg = document.getElementById('qrcode-main');
+      if (mainImg) mainImg.src = data.main;
+    }
+  } catch(e) {}
 }
 
 // ===== 移动端：权益数据 =====
@@ -961,8 +1083,248 @@ function checkUrlParam() {
   if (city) setTimeout(() => showCity(city), 100);
 }
 
+// ===== 动态二维码加载 =====
+function loadQRCode() {
+  // 优先级: 云端(GitHub) > URL参数 > localStorage > 默认图
+  var params = new URLSearchParams(location.search);
+  var qrUrl = params.get('qr');
+
+  if (qrUrl) {
+    applyQRCode(qrUrl);
+    return;
+  }
+
+  // 优先从云端加载（GitHub 模式）
+  loadQRFromCloud();
+}
+
+function applyQRCode(url) {
+  if (!url) return;
+  // 只更新主二维码图片，不影响各地州独立二维码
+  var mainImg = document.getElementById('qrcode-main');
+  if (mainImg) mainImg.src = url;
+}
+
+function loadQRFromCloud() {
+  // GitHub 模式：直接使用 raw URL
+  if (OWNER_CONFIG && OWNER_CONFIG.storageMode === 'github') {
+    var publicUrl = 'https://raw.githubusercontent.com/' +
+      OWNER_CONFIG.github.owner + '/' +
+      OWNER_CONFIG.github.repo + '/' +
+      OWNER_CONFIG.github.branch + '/' +
+      OWNER_CONFIG.github.filename;
+    // 先检查文件是否存在（通过加载测试）
+    var testImg = new Image();
+    testImg.onload = function() { applyQRCode(publicUrl); };
+    testImg.onerror = function() {
+      // raw 文件不存在，降级到 API 读取
+      CloudStorage.read().then(function(qr) {
+        if (qr) applyQRCode(qr);
+      });
+    };
+    testImg.src = publicUrl + '?_t=' + Date.now();
+    return;
+  }
+
+  // localStorage 模式
+  CloudStorage.read().then(function(qrUrl) {
+    if (qrUrl) {
+      applyQRCode(qrUrl);
+    } else {
+      var local = localStorage.getItem('yn_gaokao_qr');
+      if (local) applyQRCode(local);
+    }
+  }).catch(function() {
+    var local = localStorage.getItem('yn_gaokao_qr');
+    if (local) applyQRCode(local);
+  });
+}
+
+// ===== 管理面板：检查模式 =====
+function checkSetupMode() {
+  var params = new URLSearchParams(location.search);
+  var hasQR = localStorage.getItem('yn_gaokao_qr') || params.get('qr');
+  if (params.get('setup') === '1') {
+    showSetupMode();
+    if (localStorage.getItem('yn_gaokao_qr')) {
+      restoreFromStorage();
+    }
+  } else if (!hasQR) {
+    showSetupMode();
+  }
+}
+
+function showSetupMode() {
+  document.getElementById('landingMode').classList.add('hidden');
+  document.getElementById('setupMode').classList.remove('hidden');
+}
+
+function showLandingMode() {
+  document.getElementById('setupMode').classList.add('hidden');
+  document.getElementById('landingMode').classList.remove('hidden');
+}
+
+// ===== 管理面板：上传二维码 =====
+var setupFile = null;
+
+function handleSetupFile(event) {
+  var file = event.target.files[0];
+  if (!file) return;
+  setupFile = file;
+
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var dataUrl = e.target.result;
+    document.getElementById('setupPreview').classList.remove('hidden');
+    document.getElementById('setupPreviewImg').src = dataUrl;
+    document.getElementById('dropZone').innerHTML = '<i class="fas fa-check-circle text-3xl text-green-500 mb-3"></i><p class="text-gray-600 font-medium">已选择: ' + file.name + '</p><p class="text-xs text-gray-400 mt-1">' + (file.size / 1024).toFixed(1) + ' KB</p>';
+    // 更新步骤
+    document.getElementById('step2').className = 'w-8 h-8 rounded-full bg-brand-700 text-white text-sm font-bold flex items-center justify-center mx-auto mb-1';
+    document.getElementById('step2text').className = 'text-xs text-gray-500';
+    // 直接保存到本地
+    saveSetupQR(dataUrl);
+  };
+  reader.readAsDataURL(file);
+}
+
+function saveSetupQR(dataUrl) {
+  localStorage.setItem('yn_gaokao_qr', dataUrl);
+  // 生成分享链接
+  var baseUrl = window.location.protocol + '//' + window.location.hostname + (window.location.port ? ':' + window.location.port : '');
+  var link = baseUrl + '/yn-gaokao/index.html?qr=' + encodeURIComponent(dataUrl);
+  // 也支持根路径
+  var link2 = baseUrl + '/index.html?qr=' + encodeURIComponent(dataUrl);
+
+  document.getElementById('shareLink').value = link;
+  document.getElementById('linkArea').classList.remove('hidden');
+  document.getElementById('doneArea').classList.remove('hidden');
+  // 更新步骤
+  document.getElementById('step3').className = 'w-8 h-8 rounded-full bg-brand-700 text-white text-sm font-bold flex items-center justify-center mx-auto mb-1';
+  document.getElementById('step3text').className = 'text-xs text-gray-500';
+}
+
+function restoreFromStorage() {
+  var qrData = localStorage.getItem('yn_gaokao_qr');
+  if (!qrData) return;
+  document.getElementById('setupPreview').classList.remove('hidden');
+  document.getElementById('setupPreviewImg').src = qrData;
+  document.getElementById('dropZone').innerHTML = '<i class="fas fa-check-circle text-3xl text-green-500 mb-3"></i><p class="text-gray-600 font-medium">二维码已就绪</p><p class="text-xs text-gray-400 mt-1">点击可重新上传</p>';
+  document.getElementById('step2').className = 'w-8 h-8 rounded-full bg-brand-700 text-white text-sm font-bold flex items-center justify-center mx-auto mb-1';
+  document.getElementById('step2text').className = 'text-xs text-gray-500';
+  document.getElementById('step3').className = 'w-8 h-8 rounded-full bg-brand-700 text-white text-sm font-bold flex items-center justify-center mx-auto mb-1';
+  document.getElementById('step3text').className = 'text-xs text-gray-500';
+  document.getElementById('doneArea').classList.remove('hidden');
+  var baseUrl = window.location.protocol + '//' + window.location.hostname + (window.location.port ? ':' + window.location.port : '');
+  var link = baseUrl + '/yn-gaokao/index.html?qr=' + encodeURIComponent(qrData);
+  document.getElementById('shareLink').value = link;
+  document.getElementById('linkArea').classList.remove('hidden');
+}
+
+function resetUpload() {
+  setupFile = null;
+  document.getElementById('setupPreview').classList.add('hidden');
+  document.getElementById('fileInput').value = '';
+  document.getElementById('dropZone').innerHTML = '<i class="fas fa-cloud-upload-alt text-3xl text-gray-300 mb-3"></i><p class="text-gray-500 font-medium">点击选择二维码图片</p><p class="text-xs text-gray-400 mt-1">清晰的微信二维码截图 (JPG/PNG)</p>';
+}
+
+function resetAll() {
+  if (!confirm('确定要重置二维码吗？重新上传即可更新。')) return;
+  localStorage.removeItem('yn_gaokao_qr');
+  resetUpload();
+  document.getElementById('linkArea').classList.add('hidden');
+  document.getElementById('doneArea').classList.add('hidden');
+  document.getElementById('step2').className = 'w-8 h-8 rounded-full bg-gray-200 text-gray-500 text-sm font-bold flex items-center justify-center mx-auto mb-1';
+  document.getElementById('step2text').className = 'text-xs text-gray-400';
+  document.getElementById('step3').className = 'w-8 h-8 rounded-full bg-gray-200 text-gray-500 text-sm font-bold flex items-center justify-center mx-auto mb-1';
+  document.getElementById('step3text').className = 'text-xs text-gray-400';
+}
+
+function copyShareLink() {
+  var input = document.getElementById('shareLink');
+  input.select();
+  input.setSelectionRange(0, 99999);
+  navigator.clipboard.writeText(input.value).then(function() {
+    showToast('链接已复制！去发帖吧');
+  }).catch(function() {
+    document.execCommand('copy');
+    showToast('链接已复制！');
+  });
+}
+
+function previewLandingPage() {
+  window.open(location.pathname + '?qr=' + encodeURIComponent(localStorage.getItem('yn_gaokao_qr')), '_blank');
+}
+
+// ===== 动态家长计数 =====
+(function() {
+  // 配置：起始日期和人数（2026年5月15日，2500人）
+  var BASE_DATE = new Date(2026, 4, 15);
+  var BASE_COUNT = 2500;
+  // 每日随机增长范围 47-70
+  var MIN_DAILY = 47;
+  var MAX_DAILY = 70;
+
+  // 根据日期字符串生成确定性 hash -> 保证同一天数字一致
+  function seededHash(dateStr) {
+    var h = 0;
+    for (var i = 0; i < dateStr.length; i++) {
+      h = ((h << 5) - h) + dateStr.charCodeAt(i);
+      h = h & 0x7FFFFFFF;
+    }
+    return h;
+  }
+
+  // 计算到今天为止的总人数
+  function calcTotalCount() {
+    var today = new Date();
+    today.setHours(0, 0, 0, 0);
+    var diff = Math.floor((today.getTime() - BASE_DATE.getTime()) / 86400000);
+    if (diff <= 0) return BASE_COUNT;
+
+    var total = BASE_COUNT;
+    for (var d = 0; d <= diff; d++) {
+      var dt = new Date(BASE_DATE);
+      dt.setDate(dt.getDate() + d);
+      var ds = dt.toISOString().slice(0, 10);
+      var inc = MIN_DAILY + (seededHash(ds) % (MAX_DAILY - MIN_DAILY + 1));
+      total += inc;
+    }
+    return total;
+  }
+
+  var targetCount = calcTotalCount();
+
+  // 数字动画：从当前值递增到目标值
+  function animateCount(el, target) {
+    var current = 0;
+    var step = Math.max(1, Math.floor(target / 60));
+    var interval = setInterval(function() {
+      current += step;
+      if (current >= target) {
+        current = target;
+        clearInterval(interval);
+        // 到达目标后，每 5 秒随机 +0~1，模拟实时增长
+        setInterval(function() {
+          var now = parseInt(el.textContent.replace(/,/g, ''), 10);
+          el.textContent = (now + (Math.random() < 0.4 ? 1 : 0)).toLocaleString();
+        }, 5000);
+      }
+      el.textContent = current.toLocaleString();
+    }, 25);
+  }
+
+  // 页面加载后启动动画
+  window.startParentCounter = function() {
+    var m = document.getElementById('parentCountMobile');
+    var d = document.getElementById('parentCountDesktop');
+    if (m) animateCount(m, targetCount);
+    if (d) animateCount(d, targetCount);
+  };
+})();
+
 // ===== Init =====
 document.addEventListener('DOMContentLoaded', () => {
+  checkSetupMode();
   updateCountdown();
   renderCities();
   generateLiveFeed();
@@ -970,6 +1332,9 @@ document.addEventListener('DOMContentLoaded', () => {
   renderMobileBenefits();
   renderMobileReviews();
   checkUrlParam();
+  loadQRCode();
+  startParentCounter();
+  initCityQRs();
 });
 </script>
 </body>

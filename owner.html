@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>管理后台 · 各地州二维码</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="owner-config.js"></script>
+<script src="cloud-config.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif; background:#f3f4f6; min-height:100vh; }
+.card { background:#fff; border-radius:16px; border:1px solid #e5e7eb; }
+.hidden { display:none !important; }
+.city-card { transition:all 0.2s ease; cursor:pointer; }
+.city-card:hover { border-color:#93c5fd; }
+.city-card.has-qr { border-color:#86efac; background:#f0fdf4; }
+.qr-thumb { width:80px; height:80px; object-fit:cover; border-radius:8px; border:1px solid #e5e7eb; }
+.qr-thumb.default { opacity:0.4; }
+</style>
+</head>
+<body>
+
+<div id="app" class="max-w-5xl mx-auto px-4 py-10">
+
+  <!-- 头部 -->
+  <div class="text-center mb-8">
+    <div class="w-14 h-14 rounded-2xl bg-blue-700 flex items-center justify-center mx-auto mb-3 shadow-lg">
+      <i class="fas fa-qrcode text-white text-xl"></i>
+    </div>
+    <h1 class="text-xl font-bold text-gray-900">各地州二维码管理</h1>
+    <p class="text-sm text-gray-400 mt-1">为每个地州单独设置微信二维码，家长看到对应城市的专属二维码</p>
+  </div>
+
+  <!-- ===== 登录 ===== -->
+  <div id="loginPanel" class="card p-6 shadow-sm max-w-sm mx-auto">
+    <div class="text-center mb-4">
+      <i class="fas fa-lock text-gray-300 text-2xl mb-2"></i>
+      <p class="text-sm text-gray-500">请输入管理密码</p>
+    </div>
+    <input id="pwdInput" type="password" placeholder="输入密码"
+      class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none"
+      onkeydown="if(event.key==='Enter')doLogin()">
+    <button onclick="doLogin()" class="w-full mt-3 py-3 bg-blue-700 text-white rounded-xl font-bold text-sm hover:bg-blue-800 transition-all shadow-sm">
+      <i class="fas fa-arrow-right mr-1.5"></i>进入管理
+    </button>
+    <p id="loginError" class="hidden text-red-500 text-xs text-center mt-2"></p>
+  </div>
+
+  <!-- ===== 管理面板 ===== -->
+  <div id="adminPanel" class="hidden">
+
+    <!-- 存储状态 -->
+    <div id="statusBar" class="card p-4 mb-4 shadow-sm flex items-center gap-3">
+      <i id="statusIcon" class="fas fa-circle text-gray-300 text-xs"></i>
+      <span id="statusText" class="text-sm text-gray-500">检查连接中...</span>
+    </div>
+
+    <!-- ===== 主二维码 ===== -->
+    <div class="card p-6 mb-6 shadow-sm">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="font-bold text-gray-900"><i class="fas fa-star text-yellow-500 mr-1.5"></i>主二维码</h2>
+          <p class="text-xs text-gray-400 mt-0.5">页面底部"立即加入"展示的默认二维码</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <img id="mainQrPreview" src="二维码.jpg" alt="主二维码" class="qr-thumb">
+          <label class="px-4 py-2 bg-blue-700 text-white rounded-xl text-sm font-semibold hover:bg-blue-800 transition-all shadow-sm cursor-pointer">
+            <i class="fas fa-upload mr-1"></i>上传
+            <input type="file" accept="image/*" class="hidden" onchange="uploadMainQR(event)">
+          </label>
+        </div>
+      </div>
+      <div id="mainQrStatus" class="text-xs text-green-600 hidden"><i class="fas fa-check-circle mr-1"></i>已设置自定义二维码</div>
+    </div>
+
+    <!-- ===== 各地州二维码 ===== -->
+    <div class="card p-6 shadow-sm">
+      <div class="flex items-center justify-between mb-5">
+        <div>
+          <h2 class="font-bold text-gray-900"><i class="fas fa-city mr-1.5 text-blue-700"></i>各地州二维码</h2>
+          <p class="text-xs text-gray-400 mt-0.5">每个地州可以单独设置不同的二维码</p>
+        </div>
+        <span id="cityCount" class="text-xs text-gray-400 bg-gray-50 px-3 py-1 rounded-full"></span>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3" id="cityGrid">
+        <!-- JS 渲染 -->
+      </div>
+
+      <!-- 保存按钮 -->
+      <div class="mt-6 pt-4 border-t border-gray-100 flex flex-wrap gap-3 items-center justify-between">
+        <div class="text-xs text-gray-400">
+          <i class="fas fa-info-circle mr-1"></i>
+          上传后自动保存，无需手动点击保存
+        </div>
+        <div class="flex gap-2">
+          <button onclick="exportConfig()" class="px-4 py-2 border border-gray-200 rounded-xl text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-all">
+            <i class="fas fa-download mr-1"></i>导出配置
+          </button>
+          <a href="index.html" target="_blank" class="px-4 py-2 bg-green-600 text-white rounded-xl text-sm font-semibold hover:bg-green-700 transition-all shadow-sm">
+            <i class="fas fa-external-link-alt mr-1"></i>预览落地页
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 使用说明 -->
+    <div class="card p-4 mt-4 shadow-sm">
+      <div class="flex items-start gap-3 text-sm text-gray-500">
+        <i class="fas fa-lightbulb text-yellow-500 mt-0.5"></i>
+        <div>
+          <p class="font-medium text-gray-700">使用说明</p>
+          <ul class="mt-1 text-xs space-y-1 list-disc pl-4">
+            <li>每个地州可上传独立的微信二维码，家长选择地州后看到对应二维码</li>
+            <li>未单独设置二维码的地州，默认显示主二维码</li>
+            <li>二维码过期后，随时回来重新上传，落地页链接不变</li>
+            <li id="storageHint">当前使用 <strong>本地存储</strong>，二维码仅在你本机可见。配置 GitHub 后可同步给所有访客</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ===== 城市数据 =====
+var CITIES = [
+  { id:'kunming',  name:'昆明市', short:'昆明', icon:'fa-city' },
+  { id:'qujing',   name:'曲靖市', short:'曲靖', icon:'fa-school' },
+  { id:'dali',     name:'大理州', short:'大理', icon:'fa-landmark' },
+  { id:'yuxi',     name:'玉溪市', short:'玉溪', icon:'fa-water' },
+  { id:'honghe',   name:'红河州', short:'红河', icon:'fa-mountain' },
+  { id:'chuxiong', name:'楚雄州', short:'楚雄', icon:'fa-leaf' },
+  { id:'zhaotong', name:'昭通市', short:'昭通', icon:'fa-users' },
+  { id:'wenshan',  name:'文山州', short:'文山', icon:'fa-seedling' },
+  { id:'baoshan',  name:'保山市', short:'保山', icon:'fa-history' },
+  { id:'lijiang',  name:'丽江市', short:'丽江', icon:'fa-music' },
+  { id:'puer',     name:'普洱市', short:'普洱', icon:'fa-mug-saucer' },
+  { id:'linxiang', name:'临沧市', short:'临沧', icon:'fa-tree' },
+  { id:'dehong',   name:'德宏州', short:'德宏', icon:'fa-feather' },
+  { id:'nujiang',  name:'怒江州', short:'怒江', icon:'fa-water' },
+  { id:'diqing',   name:'迪庆州', short:'迪庆', icon:'fa-snowflake' },
+  { id:'ynOthers', name:'其他地区', short:'云南', icon:'fa-globe' }
+];
+
+var CITY_COLORS = {
+  kunming:'#2563eb', qujing:'#059669', dali:'#7c3aed', yuxi:'#0891b2',
+  honghe:'#dc2626', chuxiong:'#ea580c', zhaotong:'#0d9488', wenshan:'#65a30d',
+  baoshan:'#6366f1', lijiang:'#db2777', puer:'#a16207', linxiang:'#4d7c0f',
+  dehong:'#e11d48', nujiang:'#64748b', diqing:'#8b5cf6', ynOthers:'#6b7280'
+};
+
+// ===== 数据状态 =====
+var qrData = { main: '', cities: {} };
+var defaultQR = '二维码.jpg';
+var pendingUploads = {}; // cityId -> base64 dataUrl
+
+// ===== 登录 =====
+function doLogin() {
+  var pwd = document.getElementById('pwdInput').value;
+  if (pwd === OWNER_CONFIG.password) {
+    document.getElementById('loginPanel').classList.add('hidden');
+    document.getElementById('adminPanel').classList.remove('hidden');
+    initAdmin();
+  } else {
+    var err = document.getElementById('loginError');
+    err.textContent = '密码错误，请重试';
+    err.classList.remove('hidden');
+    document.getElementById('pwdInput').value = '';
+  }
+}
+
+// ===== 初始化 =====
+async function initAdmin() {
+  checkStatus();
+  renderCityGrid();
+  await loadData();
+}
+
+async function checkStatus() {
+  var icon = document.getElementById('statusIcon');
+  var text = document.getElementById('statusText');
+  var hint = document.getElementById('storageHint');
+
+  if (OWNER_CONFIG.storageMode === 'github') {
+    var cfg = OWNER_CONFIG.github;
+    if (!cfg.token) {
+      icon.className = 'fas fa-exclamation-triangle text-yellow-500 text-xs';
+      text.innerHTML = '<span class="text-yellow-600 font-medium">提示：</span>GitHub token 未配置，使用本地存储';
+      return;
+    }
+    var result = await CloudStorage.testConnection();
+    if (result.ok) {
+      icon.className = 'fas fa-check-circle text-green-500 text-xs';
+      text.innerHTML = '<span class="text-green-600 font-medium">GitHub 已连接</span> · 所有访客可见';
+      if (hint) hint.innerHTML = '当前使用 <strong>GitHub 存储</strong>，二维码对所有访客可见 ✓';
+    } else {
+      icon.className = 'fas fa-times-circle text-red-500 text-xs';
+      text.textContent = '连接失败: ' + result.msg;
+    }
+  } else {
+    icon.className = 'fas fa-info-circle text-blue-500 text-xs';
+    text.innerHTML = '<span class="text-blue-600 font-medium">本地存储</span> · 仅你本机可见';
+  }
+}
+
+// ===== 渲染城市网格 =====
+function renderCityGrid() {
+  var grid = document.getElementById('cityGrid');
+  document.getElementById('cityCount').textContent = '共 ' + CITIES.length + ' 个地州';
+
+  grid.innerHTML = CITIES.map(function(c) {
+    var color = CITY_COLORS[c.id] || '#6b7280';
+    return `
+      <div class="city-card card p-4" data-city="${c.id}">
+        <div class="flex items-center gap-2 mb-3">
+          <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:${color}">
+            <i class="fas ${c.icon} text-white text-xs"></i>
+          </div>
+          <div>
+            <div class="font-semibold text-gray-900 text-sm">${c.name}</div>
+            <div class="text-xs text-gray-400">${c.short}</div>
+          </div>
+        </div>
+        <div class="text-center">
+          <img id="qr-${c.id}" src="${defaultQR}" alt="${c.name}二维码" class="qr-thumb default mx-auto mb-2">
+          <label class="block w-full py-2 bg-gray-50 text-gray-600 rounded-xl text-xs font-medium hover:bg-blue-50 hover:text-blue-700 transition-all cursor-pointer border border-gray-100">
+            <i class="fas fa-upload mr-1"></i>上传二维码
+            <input type="file" accept="image/*" class="hidden" onchange="uploadCityQR('${c.id}', event)">
+          </label>
+          <button id="del-${c.id}" onclick="removeCityQR('${c.id}')" class="hidden mt-1 text-xs text-gray-300 hover:text-red-500 transition-colors w-full">
+            <i class="fas fa-trash-alt mr-0.5"></i>移除
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ===== 加载已有数据 =====
+async function loadData() {
+  try {
+    var data = await CloudStorage.readCityQRData();
+    if (data) {
+      qrData = data;
+      applyData();
+    }
+  } catch(e) {}
+}
+
+function applyData() {
+  // 主二维码
+  if (qrData.main) {
+    var mainImg = document.getElementById('mainQrPreview');
+    if (mainImg) mainImg.src = qrData.main;
+    document.getElementById('mainQrStatus').classList.remove('hidden');
+  }
+
+  // 各城市二维码
+  if (qrData.cities) {
+    Object.keys(qrData.cities).forEach(function(id) {
+      var qr = qrData.cities[id];
+      if (!qr) return;
+      var img = document.getElementById('qr-' + id);
+      if (img) {
+        img.src = qr;
+        img.classList.remove('default');
+      }
+      var card = img ? img.closest('.city-card') : null;
+      if (card) card.classList.add('has-qr');
+      var delBtn = document.getElementById('del-' + id);
+      if (delBtn) delBtn.classList.remove('hidden');
+    });
+  }
+}
+
+// ===== 上传主二维码 =====
+function uploadMainQR(event) {
+  var file = event.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var dataUrl = e.target.result;
+    var img = document.getElementById('mainQrPreview');
+    if (img) img.src = dataUrl;
+    qrData.main = dataUrl;
+    document.getElementById('mainQrStatus').classList.remove('hidden');
+    saveData();
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+}
+
+// ===== 上传城市二维码 =====
+function uploadCityQR(cityId, event) {
+  var file = event.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var dataUrl = e.target.result;
+    var img = document.getElementById('qr-' + cityId);
+    if (img) {
+      img.src = dataUrl;
+      img.classList.remove('default');
+    }
+    var card = img ? img.closest('.city-card') : null;
+    if (card) card.classList.add('has-qr');
+    var delBtn = document.getElementById('del-' + cityId);
+    if (delBtn) delBtn.classList.remove('hidden');
+    if (!qrData.cities) qrData.cities = {};
+    qrData.cities[cityId] = dataUrl;
+    saveData();
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+}
+
+// ===== 移除城市二维码（恢复默认） =====
+function removeCityQR(cityId) {
+  if (!confirm('确定移除 ' + (CITIES.find(function(c){return c.id===cityId})||{}).name + ' 的专属二维码？将恢复为主二维码。')) return;
+  delete qrData.cities[cityId];
+  var img = document.getElementById('qr-' + cityId);
+  if (img) {
+    img.src = defaultQR;
+    img.classList.add('default');
+  }
+  var card = img ? img.closest('.city-card') : null;
+  if (card) card.classList.remove('has-qr');
+  var delBtn = document.getElementById('del-' + cityId);
+  if (delBtn) delBtn.classList.add('hidden');
+  saveData();
+}
+
+// ===== 保存数据 =====
+async function saveData() {
+  var result = await CloudStorage.writeCityQRData(qrData);
+  if (result && result.success) {
+    showToast('已保存');
+  } else if (result && result.error) {
+    showToast('保存失败: ' + result.error);
+  }
+}
+
+// ===== 导出配置 =====
+function exportConfig() {
+  var text = JSON.stringify(qrData, null, 2);
+  // 创建下载
+  var blob = new Blob([text], { type: 'application/json' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'city-qr-data.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('配置已导出');
+}
+
+// ===== Toast 提示 =====
+function showToast(msg) {
+  var existing = document.querySelector('.toast-msg');
+  if (existing) existing.remove();
+  var div = document.createElement('div');
+  div.className = 'toast-msg fixed top-5 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white px-5 py-3 rounded-xl text-sm shadow-lg';
+  div.textContent = msg;
+  document.body.appendChild(div);
+  setTimeout(function() { div.remove(); }, 2000);
+}
+</script>
+</body>
+</html>
