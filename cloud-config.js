@@ -90,6 +90,34 @@ var CloudStorage = (function() {
     }
   }
 
+  // 获取区县专属二维码（从counties子对象读取，没有则返回null）
+  async function getCountyQR(cityId, countyName) {
+    var data = await readCityQRData();
+    if (data && data.counties) {
+      var key = cityId + '_' + countyName;
+      if (data.counties[key]) return data.counties[key];
+    }
+    return null;
+  }
+
+  // 保存区县专属二维码
+  async function writeCountyQR(cityId, countyName, dataUrl) {
+    var data = await readCityQRData() || { main1: '', main2: '', cities: {}, counties: {} };
+    if (!data.counties) data.counties = {};
+    var key = cityId + '_' + countyName;
+    data.counties[key] = dataUrl;
+    return writeCityQRData(data);
+  }
+
+  // 移除区县专属二维码
+  async function removeCountyQR(cityId, countyName) {
+    var data = await readCityQRData();
+    if (!data || !data.counties) return { success: true };
+    var key = cityId + '_' + countyName;
+    delete data.counties[key];
+    return writeCityQRData(data);
+  }
+
   // 获取单个城市的二维码
   async function getCityQR(cityId) {
     var data = await readCityQRData();
@@ -234,6 +262,9 @@ var CloudStorage = (function() {
     read: read,
     write: write,
     getCityQR: getCityQR,
+    getCountyQR: getCountyQR,
+    writeCountyQR: writeCountyQR,
+    removeCountyQR: removeCountyQR,
     readCityQRData: readCityQRData,
     writeCityQRData: writeCityQRData,
     getBackend: getBackend,

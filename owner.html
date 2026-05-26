@@ -162,6 +162,25 @@ var CITIES = [
   { id:'ynOthers', name:'西双版纳', short:'版纳', icon:'fa-tree' }
 ];
 
+const COUNTIES = {
+  kunming: ['主城区','东川区','晋宁区','安宁市','富民县','宜良县','嵩明县','石林彝族自治县','禄劝彝族苗族自治县','寻甸回族彝族自治县'],
+  qujing: ['麒麟区','沾益区','马龙区','宣威市','陆良县','师宗县','罗平县','富源县','会泽县'],
+  dali: ['大理市','祥云县','宾川县','弥渡县','永平县','云龙县','洱源县','剑川县','鹤庆县','漾濞彝族自治县','南涧彝族自治县','巍山彝族回族自治县'],
+  yuxi: ['红塔区','江川区','通海县','澄江市','华宁县','易门县','峨山彝族自治县','新平彝族傣族自治县','元江哈尼族彝族傣族自治县'],
+  honghe: ['蒙自市','个旧市','开远市','弥勒市','建水县','石屏县','泸西县','元阳县','红河县','绿春县','屏边苗族自治县','河口瑶族自治县','金平苗族瑶族傣族自治县'],
+  chuxiong: ['楚雄市','禄丰市','双柏县','牟定县','南华县','姚安县','大姚县','永仁县','元谋县','武定县'],
+  zhaotong: ['昭阳区','鲁甸县','巧家县','盐津县','大关县','永善县','绥江县','镇雄县','彝良县','威信县','水富市'],
+  wenshan: ['文山市','砚山县','西畴县','麻栗坡县','马关县','丘北县','广南县','富宁县'],
+  baoshan: ['隆阳区','腾冲市','施甸县','龙陵县','昌宁县'],
+  lijiang: ['古城区','永胜县','华坪县','玉龙纳西族自治县','宁蒗彝族自治县'],
+  puer: ['思茅区','宁洱哈尼族彝族自治县','墨江哈尼族自治县','景东彝族自治县','景谷傣族彝族自治县','镇沅彝族哈尼族拉祜族自治县','江城哈尼族彝族自治县','孟连傣族拉祜族佤族自治县','澜沧拉祜族自治县','西盟佤族自治县'],
+  linxiang: ['临翔区','凤庆县','云县','永德县','镇康县','双江拉祜族佤族布朗族傣族自治县','耿马傣族佤族自治县','沧源佤族自治县'],
+  dehong: ['芒市','瑞丽市','梁河县','盈江县','陇川县'],
+  nujiang: ['泸水市','福贡县','贡山独龙族怒族自治县','兰坪白族普米族自治县'],
+  diqing: ['香格里拉市','德钦县','维西傈僳族自治县'],
+  ynOthers: ['景洪市','勐海县','勐腊县']
+};
+
 var CITY_COLORS = {
   kunming:'#2563eb', qujing:'#059669', dali:'#7c3aed', yuxi:'#0891b2',
   honghe:'#dc2626', chuxiong:'#ea580c', zhaotong:'#0d9488', wenshan:'#65a30d',
@@ -249,6 +268,9 @@ function renderCityGrid() {
           </label>
           <button id="del-${c.id}" onclick="removeCityQR('${c.id}')" class="hidden mt-1 text-xs text-gray-300 hover:text-red-500 transition-colors w-full">
             <i class="fas fa-trash-alt mr-0.5"></i>移除
+          </button>
+          <button onclick="openCountyManager('${c.id}')" class="mt-1 w-full py-1.5 bg-gray-50 text-gray-500 rounded-xl text-[11px] font-medium hover:bg-purple-50 hover:text-purple-700 transition-all border border-gray-100">
+            <i class="fas fa-layer-group mr-0.5"></i>区县管理
           </button>
         </div>
       </div>
@@ -387,6 +409,105 @@ function exportConfig() {
   showToast('配置已导出');
 }
 
+// ===== 区县二维码管理 =====
+var _countyManageCityId = null;
+
+function openCountyManager(cityId) {
+  _countyManageCityId = cityId;
+  var city = CITIES.find(function(c){ return c.id === cityId; });
+  document.getElementById('countyModalTitle').textContent = city ? city.name + ' - 区县二维码' : '区县二维码管理';
+  var body = document.getElementById('countyModalBody');
+  var counties = COUNTIES[cityId];
+  if (!counties) {
+    body.innerHTML = '<p class="text-sm text-gray-400 text-center py-8">暂无区县数据</p>';
+    return;
+  }
+  var rows = counties.map(function(county) {
+    var key = cityId + '_' + county;
+    return '<div class="flex items-center gap-4 p-3 bg-gray-50 rounded-xl border border-gray-100" id="county-row-' + key + '">' +
+      '<div class="flex-1 min-w-0">' +
+        '<div class="font-medium text-sm text-gray-900">' + county + '</div>' +
+        '<div class="text-xs text-gray-400 mt-0.5">' + cityId + '</div>' +
+      '</div>' +
+      '<div class="shrink-0 flex items-center gap-2">' +
+        '<img id="county-qr-' + key + '" src="' + defaultQR + '" class="w-10 h-10 rounded-lg border border-gray-200 object-cover" style="display:none">' +
+        '<label class="px-3 py-1.5 bg-blue-700 text-white rounded-lg text-xs font-medium hover:bg-blue-800 transition-all cursor-pointer whitespace-nowrap">' +
+          '<i class="fas fa-upload mr-0.5"></i>上传' +
+          '<input type="file" accept="image/*" class="hidden" onchange="uploadCountyQR(\'' + cityId + '\',\'' + county + '\',event)">' +
+        '</label>' +
+        '<button onclick="removeCountyQR(\'' + cityId + '\',\'' + county + '\')" class="px-3 py-1.5 bg-gray-200 text-gray-500 rounded-lg text-xs font-medium hover:bg-red-100 hover:text-red-600 transition-all whitespace-nowrap">' +
+          '<i class="fas fa-times mr-0.5"></i>移除' +
+        '</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+  body.innerHTML = '<div class="grid gap-3">' + rows + '</div>' +
+    '<div class="mt-4 text-xs text-gray-400 text-center">上传后自动保存，仅当家长选择了对应区县时才会显示该二维码</div>';
+  // 加载已有的区县二维码
+  loadCountyQRs(cityId);
+  document.getElementById('countyModal').classList.remove('hidden');
+  document.getElementById('countyModal').classList.add('flex');
+}
+
+function closeCountyManager() {
+  document.getElementById('countyModal').classList.add('hidden');
+  document.getElementById('countyModal').classList.remove('flex');
+  _countyManageCityId = null;
+}
+
+function loadCountyQRs(cityId) {
+  CloudStorage.readCityQRData().then(function(data) {
+    if (!data || !data.counties) return;
+    Object.keys(data.counties).forEach(function(key) {
+      if (key.indexOf(cityId + '_') !== 0) return;
+      var img = document.getElementById('county-qr-' + key);
+      if (img) {
+        img.src = data.counties[key];
+        img.style.display = 'block';
+      }
+    });
+  });
+}
+
+function uploadCountyQR(cityId, countyName, event) {
+  var file = event.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var dataUrl = e.target.result;
+    var key = cityId + '_' + countyName;
+    var img = document.getElementById('county-qr-' + key);
+    if (img) {
+      img.src = dataUrl;
+      img.style.display = 'block';
+    }
+    CloudStorage.writeCountyQR(cityId, countyName, dataUrl).then(function(result) {
+      if (result && result.success) {
+        showToast(countyName + ' 二维码已保存');
+      } else if (result && result.error) {
+        showToast('保存失败: ' + result.error);
+      }
+    });
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+}
+
+function removeCountyQR(cityId, countyName) {
+  if (!confirm('确定移除 ' + countyName + ' 的专属二维码？')) return;
+  var key = cityId + '_' + countyName;
+  var img = document.getElementById('county-qr-' + key);
+  if (img) {
+    img.style.display = 'none';
+    img.src = '二维码.jpg';
+  }
+  CloudStorage.removeCountyQR(cityId, countyName).then(function(result) {
+    if (result && result.success) {
+      showToast(countyName + ' 已恢复默认');
+    }
+  });
+}
+
 // ===== Toast 提示 =====
 function showToast(msg) {
   var existing = document.querySelector('.toast-msg');
@@ -398,5 +519,23 @@ function showToast(msg) {
   setTimeout(function() { div.remove(); }, 2000);
 }
 </script>
+<!-- ===== 区县二维码管理弹窗 ===== -->
+<div id="countyModal" class="fixed inset-0 z-[300] bg-black/50 hidden items-start justify-center pt-10 pb-10 overflow-y-auto" onclick="if(event.target===this)closeCountyManager()">
+  <div class="bg-white rounded-2xl w-full max-w-2xl mx-4 shadow-2xl overflow-hidden" onclick="event.stopPropagation()">
+    <div class="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between">
+      <div>
+        <h3 class="font-bold text-gray-900 text-base" id="countyModalTitle">区县二维码管理</h3>
+        <p class="text-xs text-gray-400 mt-0.5">为每个区县单独设置微信二维码</p>
+      </div>
+      <button onclick="closeCountyManager()" class="w-8 h-8 rounded-lg bg-gray-100 text-gray-400 hover:text-gray-600 hover:bg-gray-200 transition-all flex items-center justify-center">
+        <i class="fas fa-times text-sm"></i>
+      </button>
+    </div>
+    <div class="p-6" id="countyModalBody">
+      <!-- 由JS动态渲染 -->
+    </div>
+  </div>
+</div>
+
 </body>
 </html>

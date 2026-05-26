@@ -714,6 +714,26 @@ const CITIES = [
   { id:'ynOthers', name:'西双版纳', short:'版纳', badge:'热带雨林', students:'0.7万', icon:'fa-tree', color:'#059669' }
 ];
 
+// ===== 129个县区数据 =====
+const COUNTIES = {
+  kunming: ['主城区','东川区','晋宁区','安宁市','富民县','宜良县','嵩明县','石林彝族自治县','禄劝彝族苗族自治县','寻甸回族彝族自治县'],
+  qujing: ['麒麟区','沾益区','马龙区','宣威市','陆良县','师宗县','罗平县','富源县','会泽县'],
+  dali: ['大理市','祥云县','宾川县','弥渡县','永平县','云龙县','洱源县','剑川县','鹤庆县','漾濞彝族自治县','南涧彝族自治县','巍山彝族回族自治县'],
+  yuxi: ['红塔区','江川区','通海县','澄江市','华宁县','易门县','峨山彝族自治县','新平彝族傣族自治县','元江哈尼族彝族傣族自治县'],
+  honghe: ['蒙自市','个旧市','开远市','弥勒市','建水县','石屏县','泸西县','元阳县','红河县','绿春县','屏边苗族自治县','河口瑶族自治县','金平苗族瑶族傣族自治县'],
+  chuxiong: ['楚雄市','禄丰市','双柏县','牟定县','南华县','姚安县','大姚县','永仁县','元谋县','武定县'],
+  zhaotong: ['昭阳区','鲁甸县','巧家县','盐津县','大关县','永善县','绥江县','镇雄县','彝良县','威信县','水富市'],
+  wenshan: ['文山市','砚山县','西畴县','麻栗坡县','马关县','丘北县','广南县','富宁县'],
+  baoshan: ['隆阳区','腾冲市','施甸县','龙陵县','昌宁县'],
+  lijiang: ['古城区','永胜县','华坪县','玉龙纳西族自治县','宁蒗彝族自治县'],
+  puer: ['思茅区','宁洱哈尼族彝族自治县','墨江哈尼族自治县','景东彝族自治县','景谷傣族彝族自治县','镇沅彝族哈尼族拉祜族自治县','江城哈尼族彝族自治县','孟连傣族拉祜族佤族自治县','澜沧拉祜族自治县','西盟佤族自治县'],
+  linxiang: ['临翔区','凤庆县','云县','永德县','镇康县','双江拉祜族佤族布朗族傣族自治县','耿马傣族佤族自治县','沧源佤族自治县'],
+  dehong: ['芒市','瑞丽市','梁河县','盈江县','陇川县'],
+  nujiang: ['泸水市','福贡县','贡山独龙族怒族自治县','兰坪白族普米族自治县'],
+  diqing: ['香格里拉市','德钦县','维西傈僳族自治县'],
+  ynOthers: ['景洪市','勐海县','勐腊县']
+};
+
 const CITY_DETAILS = {
   kunming:{ localSchools:'云南大学、昆明理工大学、云南师范大学、昆明医科大学、云南财经大学、云南民族大学', description:'昆明作为云南省会，教育资源集中，竞争也最为激烈。每年高考人数位居全省前列，家长对志愿填报的需求尤为迫切。', tips:['昆明考生竞争激烈，建议提前做好院校梯度规划','利用省会优势，多参加高校开放日活动','关注云南大学"双一流"建设动态'] },
   qujing:{ localSchools:'曲靖师范学院、曲靖医学高等专科学校', description:'曲靖是云南教育重镇，曲靖一中闻名全省。每年高考人数众多，考生整体素质较高。', tips:['曲靖一、二中考生可重点关注985/211院校','发挥教育强市优势，多与优秀考生交流经验','关注医学类、师范类院校在曲靖的招生计划'] },
@@ -896,9 +916,17 @@ function showCity(cityId) {
         </ul>
       </div>
 
+      <!-- 区县选择 -->
+      <div class="border-t border-gray-100 pt-6 mb-6">
+        <h3 class="text-base font-bold text-gray-900 mb-1"><i class="fas fa-map-pin text-brand-700 mr-1"></i>选择您的区县</h3>
+        <p class="text-xs text-gray-400 mb-3">选择所在区县，查看对应家长群二维码</p>
+        <div class="grid grid-cols-3 md:grid-cols-4 gap-2" id="county-grid">
+        </div>
+      </div>
+
       <div class="border-t border-gray-100 pt-8 text-center">
-        <p class="font-semibold text-gray-800 mb-1">加入 ${city.name} 家长群</p>
-        <p class="text-sm text-gray-400 mb-4">扫码加微信 · 备注"${city.short}家长"即可进群</p>
+        <p class="font-semibold text-gray-800 mb-1">加入 ${city.name} <span id="county-label">家长群</span></p>
+        <p class="text-sm text-gray-400 mb-4" id="county-hint">扫码加微信 · 备注"${city.short}家长"即可进群</p>
         <div class="w-28 h-28 mx-auto rounded-xl overflow-hidden border border-gray-200 shadow-sm">
           <img id="qrcode-city-${city.id}" src="二维码.jpg" alt="微信二维码" class="w-full h-full object-cover">
         </div>
@@ -920,6 +948,60 @@ function showCity(cityId) {
 
   // 加载城市专属二维码
   loadCityQR(city.id);
+
+  // 渲染区县网格
+  renderCountiesGrid(city.id);
+}
+
+// ===== 县区网格渲染 =====
+function renderCountiesGrid(cityId) {
+  var grid = document.getElementById('county-grid');
+  if (!grid) return;
+  var counties = COUNTIES[cityId];
+  if (!counties || counties.length === 0) {
+    grid.innerHTML = '<p class="text-xs text-gray-400 col-span-full text-center py-2">暂无区县分组</p>';
+    return;
+  }
+  // 重置选中状态
+  window._selectedCounty = null;
+  document.getElementById('county-label').textContent = '家长群';
+  var city = CITIES.find(function(c){ return c.id === cityId; });
+  document.getElementById('county-hint').textContent = '扫码加微信 · 备注"' + (city ? city.short : '') + '家长"即可进群';
+  // 渲染区县按钮
+  grid.innerHTML = counties.map(function(name) {
+    return '<div class="county-btn px-3 py-2.5 bg-gray-50 text-gray-700 text-xs rounded-lg border border-gray-100 text-center cursor-pointer hover:bg-brand-50 hover:text-brand-700 hover:border-brand-200 transition-all" data-county="' + name + '">' + name + '</div>';
+  }).join('');
+  // 事件委托
+  grid.onclick = function(e) {
+    var btn = e.target.closest('.county-btn');
+    if (!btn) return;
+    selectCounty(cityId, btn);
+  };
+}
+
+// ===== 县区选中 =====
+function selectCounty(cityId, btn) {
+  var countyName = btn.getAttribute('data-county');
+  if (!countyName) return;
+  window._selectedCounty = countyName;
+  // 高亮选中
+  document.querySelectorAll('#county-grid .county-btn').forEach(function(el) {
+    if (el.getAttribute('data-county') === countyName) {
+      el.className = 'county-btn px-3 py-2.5 bg-brand-700 text-white text-xs rounded-lg border border-brand-700 text-center cursor-pointer transition-all';
+    } else {
+      el.className = 'county-btn px-3 py-2.5 bg-gray-50 text-gray-700 text-xs rounded-lg border border-gray-100 text-center cursor-pointer hover:bg-brand-50 hover:text-brand-700 hover:border-brand-200 transition-all';
+    }
+  });
+  // 更新提示文字
+  document.getElementById('county-label').textContent = countyName + '家长群';
+  document.getElementById('county-hint').textContent = '扫码加微信 · 备注"' + cityId + '-' + countyName + '"即可进群';
+  // 加载区县专属二维码
+  var img = document.getElementById('qrcode-city-' + cityId);
+  if (img) {
+    CloudStorage.getCountyQR(cityId, countyName).then(function(qr) {
+      if (qr) img.src = qr;
+    });
+  }
 }
 
 function closeCityDetail() {
