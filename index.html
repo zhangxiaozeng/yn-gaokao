@@ -733,6 +733,14 @@ const CITY_DETAILS = {
   ynOthers:{ localSchools:'滇西应用技术大学傣医药学院', description:'西双版纳地处云南最南端，热带雨林气候，傣族文化浓郁。', tips:['少数民族考生充分利用加分政策','傣医药、旅游管理、热带农业等特色专业值得关注','关注面向边境地区的定向培养和专项计划'] }
 };
 
+// ===== 强制更新文字（解决微信缓存） =====
+document.addEventListener('DOMContentLoaded', function() {
+  if (document.body.innerHTML.indexOf('高考志愿填报系统') === -1) {
+    document.body.innerHTML = document.body.innerHTML
+      .replace(/免费查学校工具/g, '高考志愿填报系统');
+  }
+});
+
 // ===== 小程序跳转 =====
 function isWeChat() {
   return navigator.userAgent.toLowerCase().indexOf('micromessenger') !== -1;
