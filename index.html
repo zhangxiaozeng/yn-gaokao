@@ -188,7 +188,7 @@ details.benefit-card summary { list-style:none; }
   <div class="px-5 pt-16 pb-5">
     <div class="inline-flex items-center gap-2 bg-white/15 backdrop-blur rounded-full px-3 py-1.5 mb-5">
       <span class="live-dot w-2 h-2 rounded-full bg-green-400 inline-block"></span>
-      <span class="text-xs text-blue-100">距离2026高考还有</span>
+      <span class="text-xs text-blue-100">距离高考志愿填报还有</span>
       <span class="countdown-number text-white font-bold text-sm bg-white/20 px-2 py-0.5 rounded-md">19</span>
       <span class="text-xs text-blue-200">天</span>
     </div>
@@ -225,7 +225,7 @@ details.benefit-card summary { list-style:none; }
       <div class="inline-flex items-center gap-3 bg-white/90 backdrop-blur rounded-full px-4 py-2 shadow-sm border border-gray-100 mb-6">
         <span class="flex items-center gap-1.5 text-sm">
           <span class="live-dot w-2 h-2 rounded-full bg-rose-500 inline-block"></span>
-          <span class="text-gray-500">距离2026高考还有</span>
+          <span class="text-gray-500">距离高考志愿填报还有</span>
         </span>
         <span class="flex items-center gap-1">
           <span class="countdown-number text-white text-sm font-bold px-2 py-0.5 rounded-md">19</span>
@@ -755,8 +755,8 @@ function closeWxGuide() {
 // ===== 倒计时自动更新 =====
 function updateCountdown() {
   const now = new Date();
-  const gaokao = new Date(2026, 5, 7); // 2026年6月7日
-  const diff = Math.ceil((gaokao - now) / (1000 * 60 * 60 * 24));
+  const target = new Date(2026, 5, 28); // 2026年6月28日（志愿填报）
+  const diff = Math.ceil((target - now) / (1000 * 60 * 60 * 24));
   document.querySelectorAll('.countdown-number').forEach(el => {
     el.textContent = diff > 0 ? diff : 0;
   });
