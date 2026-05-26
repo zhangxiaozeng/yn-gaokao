@@ -690,6 +690,20 @@ details.benefit-card summary { list-style:none; }
 
 </div> <!-- /landingMode -->
 
+<!-- ========== 二维码大图弹窗 ========== -->
+<div id="qrModal" class="fixed inset-0 z-[200] bg-black/70 flex items-center justify-center p-6 hidden" onclick="closeQRModal(event)">
+  <div class="bg-white rounded-2xl p-6 shadow-2xl max-w-[280px] w-full" onclick="event.stopPropagation()">
+    <div class="text-center">
+      <div class="w-48 h-48 mx-auto rounded-xl overflow-hidden border border-gray-200 shadow-sm mb-3">
+        <img id="qrModalImg" src="二维码.jpg" alt="微信二维码" class="w-full h-full object-cover">
+      </div>
+      <p id="qrModalTitle" class="text-sm font-semibold text-gray-800 mb-1"></p>
+      <p class="text-xs text-gray-400 mb-4">长按图片识别二维码加群</p>
+      <button onclick="closeQRModal()" class="w-full py-2.5 bg-gray-100 text-gray-600 rounded-xl text-sm font-medium hover:bg-gray-200 transition-colors">关闭</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const CITIES = [
   { id:'kunming',  name:'昆明市', short:'昆明', badge:'省会',      students:'6.2万', icon:'fa-city',      color:'#2563eb' },
@@ -880,7 +894,7 @@ function showCity(cityId) {
           <img id="qrcode-city-${city.id}" src="二维码.jpg" alt="微信二维码" class="w-full h-full object-cover">
         </div>
         <div class="mt-4 flex flex-wrap justify-center gap-3">
-          <span class="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-700 text-white rounded-xl text-sm font-semibold shadow-sm cursor-default">
+          <span onclick="showQRModal('${city.id}')" class="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-700 text-white rounded-xl text-sm font-semibold shadow-sm cursor-pointer hover:bg-brand-800 transition-all">
             <i class="fab fa-weixin"></i>扫码加群
           </span>
         </div>
@@ -908,6 +922,25 @@ function closeCityDetail() {
   document.title = '云南高考家长群 · 已有数千位家长加入';
   const meta = document.querySelector('meta[name="description"]');
   if (meta) meta.content = '云南高考志愿填报指导，覆盖昆明、曲靖、大理、玉溪等16个地州。加入当地家长交流群，获取最新高考政策解读和志愿填报技巧。';
+}
+
+// ===== 二维码大图弹窗 =====
+var currentQRCityId = null;
+
+function showQRModal(cityId) {
+  currentQRCityId = cityId;
+  var city = CITIES.find(function(c) { return c.id === cityId; });
+  var img = document.getElementById('qrcode-city-' + cityId);
+  var modalImg = document.getElementById('qrModalImg');
+  var title = document.getElementById('qrModalTitle');
+  if (img && modalImg) modalImg.src = img.src;
+  if (title && city) title.textContent = city.name + '家长群 · 扫码加群';
+  document.getElementById('qrModal').classList.remove('hidden');
+}
+
+function closeQRModal(e) {
+  if (e && e.target !== e.currentTarget) return;
+  document.getElementById('qrModal').classList.add('hidden');
 }
 
 // ===== 加载城市专属二维码 =====
