@@ -95,7 +95,7 @@ var CloudStorage = (function() {
     var data = await readCityQRData();
     if (data) {
       if (data.cities && data.cities[cityId]) return data.cities[cityId];
-      if (data.main) return data.main;
+      if (data.main1 || data.main) return data.main1 || data.main;
     }
     // 最后兜底：旧版存储（单独上传的主二维码）
     var mainQR = await read();

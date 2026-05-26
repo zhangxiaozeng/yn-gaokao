@@ -62,17 +62,33 @@ body { font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
       <div class="flex items-center justify-between mb-4">
         <div>
           <h2 class="font-bold text-gray-900"><i class="fas fa-star text-yellow-500 mr-1.5"></i>主二维码</h2>
-          <p class="text-xs text-gray-400 mt-0.5">页面底部"立即加入"展示的默认二维码</p>
-        </div>
-        <div class="flex items-center gap-3">
-          <img id="mainQrPreview" src="二维码.jpg" alt="主二维码" class="qr-thumb">
-          <label class="px-4 py-2 bg-blue-700 text-white rounded-xl text-sm font-semibold hover:bg-blue-800 transition-all shadow-sm cursor-pointer">
-            <i class="fas fa-upload mr-1"></i>上传
-            <input type="file" accept="image/*" class="hidden" onchange="uploadMainQR(event)">
-          </label>
+          <p class="text-xs text-gray-400 mt-0.5">页面底部并排展示两个微信二维码，客户可上传相同或不同的码</p>
         </div>
       </div>
-      <div id="mainQrStatus" class="text-xs text-green-600 hidden"><i class="fas fa-check-circle mr-1"></i>已设置自定义二维码</div>
+      <div class="flex flex-wrap gap-6">
+        <div class="flex-1 min-w-[160px]">
+          <div class="text-sm font-medium text-gray-700 mb-2">微信①</div>
+          <div class="flex items-center gap-3">
+            <img id="mainQrPreview1" src="二维码.jpg" alt="主二维码1" class="qr-thumb">
+            <label class="px-4 py-2 bg-blue-700 text-white rounded-xl text-sm font-semibold hover:bg-blue-800 transition-all shadow-sm cursor-pointer whitespace-nowrap">
+              <i class="fas fa-upload mr-1"></i>上传
+              <input type="file" accept="image/*" class="hidden" onchange="uploadMainQR(1, event)">
+            </label>
+          </div>
+          <div id="mainQrStatus1" class="text-xs text-green-600 hidden mt-1"><i class="fas fa-check-circle mr-1"></i>已设置</div>
+        </div>
+        <div class="flex-1 min-w-[160px]">
+          <div class="text-sm font-medium text-gray-700 mb-2">微信②</div>
+          <div class="flex items-center gap-3">
+            <img id="mainQrPreview2" src="二维码.jpg" alt="主二维码2" class="qr-thumb">
+            <label class="px-4 py-2 bg-blue-700 text-white rounded-xl text-sm font-semibold hover:bg-blue-800 transition-all shadow-sm cursor-pointer whitespace-nowrap">
+              <i class="fas fa-upload mr-1"></i>上传
+              <input type="file" accept="image/*" class="hidden" onchange="uploadMainQR(2, event)">
+            </label>
+          </div>
+          <div id="mainQrStatus2" class="text-xs text-green-600 hidden mt-1"><i class="fas fa-check-circle mr-1"></i>已设置</div>
+        </div>
+      </div>
     </div>
 
     <!-- ===== 各地州二维码 ===== -->
@@ -154,7 +170,7 @@ var CITY_COLORS = {
 };
 
 // ===== 数据状态 =====
-var qrData = { main: '', cities: {} };
+var qrData = { main1: '', main2: '', cities: {} };
 var defaultQR = '二维码.jpg';
 var pendingUploads = {}; // cityId -> base64 dataUrl
 
@@ -252,11 +268,17 @@ async function loadData() {
 }
 
 function applyData() {
-  // 主二维码
-  if (qrData.main) {
-    var mainImg = document.getElementById('mainQrPreview');
-    if (mainImg) mainImg.src = qrData.main;
-    document.getElementById('mainQrStatus').classList.remove('hidden');
+  // 主二维码1
+  if (qrData.main1 || qrData.main) {
+    var m1 = document.getElementById('mainQrPreview1');
+    if (m1) m1.src = qrData.main1 || qrData.main;
+    document.getElementById('mainQrStatus1').classList.remove('hidden');
+  }
+  // 主二维码2
+  if (qrData.main2) {
+    var m2 = document.getElementById('mainQrPreview2');
+    if (m2) m2.src = qrData.main2;
+    document.getElementById('mainQrStatus2').classList.remove('hidden');
   }
 
   // 各城市二维码
@@ -278,16 +300,23 @@ function applyData() {
 }
 
 // ===== 上传主二维码 =====
-function uploadMainQR(event) {
+function uploadMainQR(idx, event) {
   var file = event.target.files[0];
   if (!file) return;
   var reader = new FileReader();
   reader.onload = function(e) {
     var dataUrl = e.target.result;
-    var img = document.getElementById('mainQrPreview');
+    var img = document.getElementById('mainQrPreview' + idx);
     if (img) img.src = dataUrl;
-    qrData.main = dataUrl;
-    document.getElementById('mainQrStatus').classList.remove('hidden');
+    qrData['main' + idx] = dataUrl;
+    document.getElementById('mainQrStatus' + idx).classList.remove('hidden');
+    // 如果上传了主二维码2但主二维码1为空，同步一份
+    if (idx === 2 && !qrData.main1) {
+      qrData.main1 = dataUrl;
+      var m1 = document.getElementById('mainQrPreview1');
+      if (m1) m1.src = dataUrl;
+      document.getElementById('mainQrStatus1').classList.remove('hidden');
+    }
     saveData();
   };
   reader.readAsDataURL(file);
