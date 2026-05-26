@@ -1143,14 +1143,11 @@ function loadQRFromCloud() {
 // ===== 管理面板：检查模式 =====
 function checkSetupMode() {
   var params = new URLSearchParams(location.search);
-  var hasQR = localStorage.getItem('yn_gaokao_qr') || params.get('qr');
   if (params.get('setup') === '1') {
     showSetupMode();
     if (localStorage.getItem('yn_gaokao_qr')) {
       restoreFromStorage();
     }
-  } else if (!hasQR) {
-    showSetupMode();
   }
 }
 
