@@ -52,7 +52,7 @@ URL 参数：`?city=kunming` 可直接跳转到对应地州页面
 | 德宏州 | dehong |
 | 怒江州 | nujiang |
 | 迪庆州 | diqing |
-| 其他地区 | ynOthers |
+| 西双版纳 | ynOthers |
 
 ## 扩展计划
 - [ ] 每个地州独立 HTML 文件（SEO 更优）

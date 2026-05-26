@@ -711,7 +711,7 @@ const CITIES = [
   { id:'dehong',   name:'德宏州', short:'德宏', badge:'孔雀之乡',  students:'1.0万', icon:'fa-feather',   color:'#e11d48' },
   { id:'nujiang',  name:'怒江州', short:'怒江', badge:'峡谷秘境',  students:'0.5万', icon:'fa-water',     color:'#64748b' },
   { id:'diqing',   name:'迪庆州', short:'迪庆', badge:'高原明珠',  students:'0.3万', icon:'fa-snowflake', color:'#8b5cf6' },
-  { id:'ynOthers', name:'其他地区', short:'云南', badge:'全域覆盖', students:'3万+',  icon:'fa-globe',    color:'#6b7280' }
+  { id:'ynOthers', name:'西双版纳', short:'版纳', badge:'热带雨林', students:'1.5万', icon:'fa-tree', color:'#059669' }
 ];
 
 const CITY_DETAILS = {
@@ -730,7 +730,7 @@ const CITY_DETAILS = {
   dehong:{ localSchools:'德宏师范高等专科学校', description:'德宏州与缅甸接壤，傣族、景颇族等少数民族考生占比较高。', tips:['少数民族考生充分利用加分和预科政策','东南亚语种（泰语、缅甸语）专业就业前景好','关注面向边境地区的定向培养计划'] },
   nujiang:{ localSchools:'怒江职业技术学院', description:'怒江州地处横断山脉，地理环境特殊。', tips:['充分利用专项计划和加分政策','关注乡村振兴定向培养人才计划','生态保护、地质勘探等特色专业可关注'] },
   diqing:{ localSchools:'迪庆职业技术学院', description:'迪庆州位于青藏高原东南缘，藏族人口占比高。', tips:['藏族等少数民族考生享受最优惠加分政策','关注藏语定向培养和民族文化传承专业','生态旅游、高原农业等特色专业前景广阔'] },
-  ynOthers:{ localSchools:'各地州院校', description:'无论你在云南哪个角落，我们都有对应的家长交流群。', tips:['所有地州均可享受免费的志愿填报咨询服务','线上讲座和直播覆盖全省各地','专业老师一对一指导'] }
+  ynOthers:{ localSchools:'滇西应用技术大学傣医药学院', description:'西双版纳地处云南最南端，热带雨林气候，傣族文化浓郁。', tips:['少数民族考生充分利用加分政策','傣医药、旅游管理、热带农业等特色专业值得关注','关注面向边境地区的定向培养和专项计划'] }
 };
 
 // ===== 小程序跳转 =====
@@ -756,7 +756,7 @@ function updateCountdown() {
 
 // ===== 实时动态数据 =====
 const SURNAMES = ['李','王','张','刘','陈','杨','赵','黄','周','吴','徐','孙','马','胡','朱','郭','何','罗','高','林'];
-const CITY_SHORTS = CITIES.filter(c => c.id !== 'ynOthers').map(c => c.short);
+const CITY_SHORTS = CITIES.map(c => c.short);
 const ACTIONS = [
   '刚刚加入{name}家长群',
   '扫码进群 · {name}',

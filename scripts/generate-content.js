@@ -28,7 +28,7 @@ const CITIES = [
   { id: 'dehong', name: '德宏州', short: '德宏', badge: '孔雀之乡', students: '1.0万', schools: '16所' },
   { id: 'nujiang', name: '怒江州', short: '怒江', badge: '峡谷秘境', students: '0.5万', schools: '10所' },
   { id: 'diqing', name: '迪庆州', short: '迪庆', badge: '高原明珠', students: '0.3万', schools: '8所' },
-  { id: 'ynOthers', name: '云南其他', short: '云南', badge: '全域覆盖', students: '3万+', schools: '30+所' },
+  { id: 'ynOthers', name: '西双版纳', short: '版纳', badge: '热带雨林', students: '1.5万', schools: '15所' },
 ];
 
 // ========== 内容模板 ==========
@@ -351,7 +351,7 @@ async function main() {
     '',
     '---',
     '',
-    ...posts.join('\n\n---\n\n'),
+    posts.join('\n\n---\n\n'),
     '',
     '---',
     '',
