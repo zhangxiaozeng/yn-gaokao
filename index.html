@@ -593,19 +593,22 @@ details.benefit-card summary { list-style:none; }
     <div class="mt-4 lg:mt-10 inline-block bg-white border border-gray-100 rounded-2xl p-4 lg:p-8 shadow-md hover:shadow-lg transition-all">
       <div class="flex flex-wrap justify-center gap-6">
         <div>
-          <div class="w-36 h-36 mx-auto rounded-xl overflow-hidden border border-gray-200 shadow-sm">
+          <div class="w-36 h-36 mx-auto rounded-xl overflow-hidden border border-gray-200 shadow-sm cursor-pointer hover:ring-2 hover:ring-brand-200 transition-all" onclick="showQRModal('qrcode-main')">
             <img id="qrcode-main" src="二维码.jpg" alt="微信二维码" class="w-full h-full object-cover">
           </div>
           <p class="mt-3 text-center text-sm text-gray-500">微信①</p>
         </div>
         <div>
-          <div class="w-36 h-36 mx-auto rounded-xl overflow-hidden border border-gray-200 shadow-sm">
+          <div class="w-36 h-36 mx-auto rounded-xl overflow-hidden border border-gray-200 shadow-sm cursor-pointer hover:ring-2 hover:ring-brand-200 transition-all" onclick="showQRModal('qrcode-main2')">
             <img id="qrcode-main2" src="二维码.jpg" alt="微信二维码2" class="w-full h-full object-cover">
           </div>
           <p class="mt-3 text-center text-sm text-gray-500">微信②</p>
         </div>
       </div>
       <p class="mt-4 text-center font-semibold text-gray-800">扫码加入 · 备注地州+家长</p>
+      <button onclick="showQRModal('qrcode-main')" class="mt-4 w-full py-3 bg-brand-700 text-white rounded-xl font-bold text-sm hover:bg-brand-800 transition-all shadow-sm">
+        <i class="fab fa-weixin mr-1.5"></i>点击查看大图 · 长按识别加群
+      </button>
       <div class="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 text-sm rounded-lg border border-green-200">
         <i class="fas fa-gift"></i>
         进群免费领《2026云南高考志愿填报手册》
@@ -613,7 +616,7 @@ details.benefit-card summary { list-style:none; }
     </div>
 
     <div class="mt-3 flex flex-wrap justify-center gap-3">
-      <a href="#cities" class="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-700 text-white rounded-xl font-semibold hover:bg-brand-800 transition-all shadow-sm">
+      <a href="#cities" onclick="closeCityDetail()" class="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-700 text-white rounded-xl font-semibold hover:bg-brand-800 transition-all shadow-sm">
         <i class="fas fa-map-marker-alt"></i>
         先选我的地州
       </a>
@@ -665,7 +668,7 @@ details.benefit-card summary { list-style:none; }
 <footer class="py-10 bg-gray-900 text-gray-500">
   <div class="max-w-6xl mx-auto px-5 text-center text-sm">
     <p class="text-gray-400">致力于帮助云南考生科学填报志愿，不浪费每一分</p>
-    <p class="mt-1"><p class="mt-1">&copy; 2026 云南高考指南</p>copy; 2026 云南高考指南</p>
+    <p class="mt-1">&copy; 2026 云南高考指南</p>
 	    <p class="mt-3"><a href="?setup=1" class="text-gray-600 hover:text-gray-400 text-xs transition-colors"><i class="fas fa-cog mr-1"></i>管理</a></p>
   </div>
 </footer>
@@ -678,6 +681,18 @@ details.benefit-card summary { list-style:none; }
 </div>
 
 </div> <!-- /landingMode -->
+
+<!-- ========== 二维码弹窗 ========== -->
+<div id="qrModalOverlay" class="fixed inset-0 z-[200] bg-black/60 hidden items-center justify-center" onclick="closeQRModal()">
+  <div class="bg-white rounded-2xl p-6 w-72 shadow-2xl" onclick="event.stopPropagation()">
+    <div class="w-56 h-56 mx-auto rounded-xl overflow-hidden border border-gray-200 shadow-sm">
+      <img id="qrModalImage" src="" alt="二维码" class="w-full h-full object-cover">
+    </div>
+    <p class="text-center text-sm text-gray-600 mt-4 font-medium">长按或截图保存二维码</p>
+    <p class="text-center text-xs text-gray-400 mt-1">打开微信扫一扫识别</p>
+    <button onclick="closeQRModal()" class="block w-full mt-4 py-2.5 bg-gray-100 text-gray-600 rounded-xl text-sm font-medium hover:bg-gray-200 transition-colors">关 闭</button>
+  </div>
+</div>
 
 <script>
 const CITIES = [
@@ -869,9 +884,9 @@ function showCity(cityId) {
           <img id="qrcode-city-${city.id}" src="二维码.jpg" alt="微信二维码" class="w-full h-full object-cover">
         </div>
         <div class="mt-4 flex flex-wrap justify-center gap-3">
-          <span class="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-700 text-white rounded-xl text-sm font-semibold shadow-sm cursor-default">
-            <i class="fab fa-weixin"></i>扫码加群
-          </span>
+          <button onclick="showQRModal('qrcode-city-${city.id}')" class="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-700 text-white rounded-xl text-sm font-semibold hover:bg-brand-800 transition-all shadow-sm cursor-pointer">
+            <i class="fab fa-weixin"></i>点击查看大图
+          </button>
         </div>
       </div>
     </div>
@@ -1324,6 +1339,19 @@ function previewLandingPage() {
     if (d) animateCount(d, targetCount);
   };
 })();
+
+// ===== 二维码弹窗 =====
+function showQRModal(imgId) {
+  var img = document.getElementById(imgId);
+  if (!img || !img.src) return;
+  document.getElementById('qrModalImage').src = img.src;
+  document.getElementById('qrModalOverlay').classList.remove('hidden');
+  document.getElementById('qrModalOverlay').classList.add('flex');
+}
+function closeQRModal() {
+  document.getElementById('qrModalOverlay').classList.add('hidden');
+  document.getElementById('qrModalOverlay').classList.remove('flex');
+}
 
 // ===== Init =====
 document.addEventListener('DOMContentLoaded', () => {
