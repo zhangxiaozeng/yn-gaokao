@@ -8,9 +8,25 @@ var CloudStorage = (function() {
   // ===== 各地州二维码存储 =====
   // 数据结构: { main: '', cities: { kunming: '', qujing: '', ... } }
 
+  // 同域动态加载 city-qr-data.js（微信兼容，不阻塞页面渲染）
+  var _qrDataPromise = null;
+
+  function _loadQRScript() {
+    if (_qrDataPromise) return _qrDataPromise;
+    _qrDataPromise = new Promise(function(resolve) {
+      var s = document.createElement('script');
+      s.src = 'city-qr-data.js?_t=' + Date.now();
+      s.onload = function() { resolve(); };
+      s.onerror = function() { resolve(); }; // 文件不存在也继续
+      document.head.appendChild(s);
+    });
+    return _qrDataPromise;
+  }
+
   // 读取各地州二维码数据
   async function readCityQRData() {
-    // 0. 优先读取 script 标签嵌入的数据（微信中最可靠，同域加载）
+    // 0. 同域动态加载 city-qr-data.js（微信可靠，不阻塞页面）
+    await _loadQRScript();
     if (window.__QR_DATA__) {
       var data = window.__QR_DATA__;
       // 同步到本地缓存以便下次快速读取
