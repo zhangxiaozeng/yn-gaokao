@@ -49,10 +49,24 @@
     if (img.src.indexOf('data:') === 0) {
       var blob = dataURLToBlob(img.src);
       modalImg.src = blob ? URL.createObjectURL(blob) : img.src;
-    } else {
-      modalImg.src = img.src;
+      overlay.style.display = 'flex';
+      return;
     }
-    overlay.style.display = 'flex';
+    // HTTP URL：等图片加载完再显示，确保长按时图片已渲染
+    if (modalImg.src === img.src && modalImg.complete) {
+      overlay.style.display = 'flex';
+      return;
+    }
+    modalImg.onload = function() {
+      overlay.style.display = 'flex';
+      modalImg.onload = null;
+      modalImg.onerror = null;
+    };
+    modalImg.onerror = function() {
+      overlay.style.display = 'flex';
+      modalImg.onerror = null;
+    };
+    modalImg.src = img.src;
   };
 
   window.closeQRModal = function() {
