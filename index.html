@@ -1509,13 +1509,24 @@ function dataURLToBlob(dataUrl) {
 function showQRModal(imgId) {
   var img = document.getElementById(imgId);
   if (!img || !img.src) return;
-  // 先尝试同步解码：如果二维码包含链接，直接跳转，不弹窗
-  var directUrl = decodeQRFromImg(img);
-  if (directUrl) {
-    location.href = directUrl;
-    return;
-  }
-  // 没解码出链接（非 URL 二维码/图片未加载/CORS）→ 弹窗显示二维码
+  // 1. 直接解码（图片已正常加载的情况）
+  var url = decodeQRFromImg(img);
+  if (url) { location.href = url; return; }
+  // 2. 图片存在但解码失败（bfcache 快照恢复后图片状态异常）
+  //    新建 Image 对象强制重新加载（加缓存破坏参数），再解码一次
+  var cleanSrc = img.src.indexOf('?') > -1 ? img.src.split('?')[0] : img.src;
+  var temp = new Image();
+  temp.onload = function() {
+    var url2 = decodeQRFromImg(temp);
+    if (url2) { location.href = url2; return; }
+    // 仍然解码不出 → 弹窗兜底
+    _showQRWithModal(img);
+  };
+  temp.onerror = function() { _showQRWithModal(img); };
+  temp.src = cleanSrc + '?_qr=' + Date.now();
+}
+// ===== 弹窗兜底（非 URL 二维码 / CORS 限制） =====
+function _showQRWithModal(img) {
   var overlay = document.getElementById('qrModalOverlay');
   var modalImg = document.getElementById('qrModalImage');
   if (!modalImg || !overlay) return;
