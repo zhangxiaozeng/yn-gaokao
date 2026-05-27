@@ -1477,16 +1477,45 @@ function previewLandingPage() {
 })();
 
 // ===== 二维码弹窗 =====
+// base64 转 blob（微信长按识别需要 blob URL，不支持 data: URL）
+function dataURLToBlob(dataUrl) {
+  try {
+    var parts = dataUrl.split(',');
+    var mime = parts[0].match(/:(.*?);/)[1];
+    var bstr = atob(parts[1]);
+    var n = bstr.length;
+    var u8arr = new Uint8Array(n);
+    while (n--) u8arr[n] = bstr.charCodeAt(n);
+    return new Blob([u8arr], { type: mime });
+  } catch(e) { return null; }
+}
+
 function showQRModal(imgId) {
   var img = document.getElementById(imgId);
   if (!img || !img.src) return;
-  document.getElementById('qrModalImage').src = img.src;
+  var modalImg = document.getElementById('qrModalImage');
+  // base64 转 blob URL（微信长按识别二维码需要）
+  if (img.src.indexOf('data:') === 0) {
+    var blob = dataURLToBlob(img.src);
+    if (blob) {
+      modalImg.src = URL.createObjectURL(blob);
+    } else {
+      modalImg.src = img.src;
+    }
+  } else {
+    modalImg.src = img.src;
+  }
   document.getElementById('qrModalOverlay').classList.remove('hidden');
   document.getElementById('qrModalOverlay').classList.add('flex');
 }
 function closeQRModal() {
   document.getElementById('qrModalOverlay').classList.add('hidden');
   document.getElementById('qrModalOverlay').classList.remove('flex');
+  // 释放 blob URL
+  var modalImg = document.getElementById('qrModalImage');
+  if (modalImg.src && modalImg.src.indexOf('blob:') === 0) {
+    URL.revokeObjectURL(modalImg.src);
+  }
 }
 
 // ===== Init =====
