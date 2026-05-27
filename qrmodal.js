@@ -2,6 +2,7 @@
 (function(){
   if (window.__QR_MODAL_LOADED__) return;
   window.__QR_MODAL_LOADED__ = true;
+  var _nav = window.navigateToQR || function(u) { location.href = u; };
 
   function dataURLToBlob(dataUrl) {
     try {
@@ -35,7 +36,7 @@
           '<img id="qrModalImage" src="" alt="二维码" style="display:block;width:100%;height:auto;max-height:90vh">' +
         '</div>' +
         '<div id="qrDirectAction" style="display:none;margin-top:12px">' +
-          '<button onclick="var u=document.getElementById(\'qrDirectLink\').href;if(u&&u!=\'#\')location.href=u" style="display:block;width:100%;padding:22px 12px;background:#07c160;color:#fff;border-radius:12px;font-size:18px;font-weight:700;border:none;cursor:pointer;box-sizing:border-box">' +
+          '<button onclick="var u=document.getElementById(\'qrDirectLink\').href;if(u&&u!=\'#\')window.navigateToQR?window.navigateToQR(u):(location.href=u)" style="display:block;width:100%;padding:22px 12px;background:#07c160;color:#fff;border-radius:12px;font-size:18px;font-weight:700;border:none;cursor:pointer;box-sizing:border-box">' +
             '<i class="fab fa-weixin" style="font-size:22px;margin-right:8px"></i> 加入群聊' +
           '</button>' +
           '<a id="qrDirectLink" href="#" style="display:none"></a>' +
@@ -70,13 +71,13 @@
     if (!img || !img.src) return;
     // 1. 直接解码（图片已正常加载）
     var url = decodeSync(img);
-    if (url) { location.href = url + (url.indexOf('?') > -1 ? '&' : '?') + '_t=' + Date.now(); return; }
+    if (url) { _nav(url); return; }
     // 2. bfcache 恢复后图片状态异常，用临时 Image 强制重新加载再解码
     var cleanSrc = img.src.indexOf('?') > -1 ? img.src.split('?')[0] : img.src;
     var temp = new Image();
     temp.onload = function() {
       var url2 = decodeSync(temp);
-      if (url2) { location.href = url2 + (url2.indexOf('?') > -1 ? '&' : '?') + '_t=' + Date.now(); return; }
+      if (url2) { _nav(url2); return; }
       // 仍解码不出 → 弹窗兜底
       _showModal(img);
     };
@@ -129,7 +130,7 @@
       var code = jsQR(d.data, d.width, d.height);
       if (code && code.data && code.data.indexOf('http') === 0) {
         // 解码出链接 → 直接跳走，不需要用户再操作
-        location.href = code.data + (code.data.indexOf('?') > -1 ? '&' : '?') + '_t=' + Date.now();
+        _nav(code.data);
       }
     } catch(e) { /* CORS 或不支持时静默失败 */ }
   }
