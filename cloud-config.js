@@ -56,16 +56,79 @@ var CloudStorage = (function() {
     if (!data) return { success: false, error: '无数据' };
     // 1. 先写本地（立即生效，不受网络影响）
     localStorage.setItem(CITY_KEY, JSON.stringify(data));
-    // 2. 再同步 GitHub（后台自动，失败不影响本地使用）
+    // 2. 再同步 GitHub
     if (OWNER_CONFIG.storageMode === 'github') {
-      var result = await writeCityQRToGitHub(data);
+      // 2a. 上传所有 base64 图片为独立文件，替换为 URL
+      var processedData = await _convertDataURLsToFileURLs(data);
+      // 2b. 用处理后的数据（含 URL）写入 city-qr-data.json/.js
+      var result = await writeCityQRToGitHub(processedData);
       if (!result.success) {
         console.warn('GitHub 同步失败:', result.error);
-        // 本地已经保存成功，给用户提示但不算完全失败
         return { success: true, syncError: result.error };
       }
     }
     return { success: true };
+  }
+
+  // 将数据中所有 base64 data URL 上传为图片文件，替换为相对 URL
+  async function _convertDataURLsToFileURLs(data) {
+    var hasBase64 = false;
+    // 快速扫描是否含有 base64 data
+    function check(obj) {
+      if (!obj || typeof obj !== 'object') return;
+      Object.values(obj).forEach(function(v) {
+        if (typeof v === 'string' && v.startsWith('data:image/')) hasBase64 = true;
+        else if (typeof v === 'object') check(v);
+      });
+    }
+    check(data);
+    if (!hasBase64) return data; // 没有 base64 直接返回
+
+    var result = JSON.parse(JSON.stringify(data)); // 深拷贝
+
+    // 获取扩展名
+    function getExt(dataUrl) {
+      var m = dataUrl.match(/data:image\/(\w+);/);
+      if (!m) return '.jpg';
+      return m[1] === 'png' ? '.png' : '.jpg';
+    }
+
+    // 处理单个值：如果是 base64 就上传并返回 URL，否则原值返回
+    async function processVal(key, val) {
+      if (val && typeof val === 'string' && val.startsWith('data:image/')) {
+        var ext = getExt(val);
+        var b64 = val.split(',')[1];
+        var filename = 'qr/' + key + ext;
+        var up = await uploadImageToGitHub(filename, b64);
+        if (up.success) return filename; // 返回相对 URL
+      }
+      return val;
+    }
+
+    // 主二维码
+    if (result.main) result.main = await processVal('main', result.main);
+    if (result.main1) result.main1 = await processVal('main', result.main1);
+    if (result.main2) result.main2 = await processVal('main', result.main2);
+
+    // 各地州
+    if (result.cities) {
+      var cityKeys = Object.keys(result.cities);
+      for (var ci = 0; ci < cityKeys.length; ci++) {
+        var ck = cityKeys[ci];
+        result.cities[ck] = await processVal('city_' + ck, result.cities[ck]);
+      }
+    }
+
+    // 各区县
+    if (result.counties) {
+      var countyKeys = Object.keys(result.counties);
+      for (var ki = 0; ki < countyKeys.length; ki++) {
+        var ky = countyKeys[ki];
+        result.counties[ky] = await processVal('county_' + ky, result.counties[ky]);
+      }
+    }
+
+    return result;
   }
 
   // 带超时的 fetch 封装（微信中请求可能长时间挂起）
@@ -149,6 +212,47 @@ var CloudStorage = (function() {
       return { success: false, error: err.message || '上传失败' };
     } catch(e) {
       return { success: false, error: e.message || '网络错误' };
+    }
+  }
+
+  // 上传二维码图片到 GitHub（直接传 base64 给 API）
+  async function uploadImageToGitHub(filename, base64Data) {
+    var cfg = OWNER_CONFIG.github;
+    var token = cfg.token || localStorage.getItem('yn_gaokao_github_token') || '';
+    if (!token) return { success: false, error: 'GitHub token 未配置' };
+
+    var url = 'https://api.github.com/repos/' + cfg.owner + '/' + cfg.repo + '/contents/' + filename;
+    var sha = '';
+    try {
+      var checkResp = await fetch(url, {
+        headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json' }
+      });
+      if (checkResp.ok) {
+        var existing = await checkResp.json();
+        sha = existing.sha;
+      }
+    } catch(e) {}
+
+    var body = {
+      message: '上传二维码图片 ' + filename,
+      content: base64Data,
+      branch: cfg.branch
+    };
+    if (sha) body.sha = sha;
+
+    try {
+      var resp = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          'Authorization': 'token ' + token,
+          'Accept': 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+      });
+      return { success: resp.ok, error: resp.ok ? undefined : ((await resp.json()).message || '上传失败') };
+    } catch(e) {
+      return { success: false, error: e.message };
     }
   }
 
