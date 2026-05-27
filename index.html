@@ -16,15 +16,10 @@
     url = (url + sep + '_t=' + Date.now()).replace(hash, '') + hash;
     window.location.replace(url);
   }
-  // ===== 微信 bfcache 快照恢复检测：从页面快照回来时强制刷新 =====
+  // ===== 微信 bfcache 快照恢复：不强制刷新页面，showQRModal 内有 bfcache 图片恢复逻辑 =====
   window.addEventListener('pageshow', function(ev) {
     if (ev.persisted) {
-      var cur = window.location.href;
-      var sep = cur.indexOf('?') > -1 ? '&' : '?';
-      var hash = window.location.hash;
-      cur = cur.replace(/[?&]_t=[^&]*/g, '');
-      cur = (cur + sep + '_t=' + Date.now()).replace(hash, '') + hash;
-      window.location.replace(cur);
+      window.__FROM_BFCACHE__ = true;
     }
   });
 })();
@@ -1506,19 +1501,35 @@ function dataURLToBlob(dataUrl) {
     return new Blob([u8arr], { type: mime });
   } catch(e) { return null; }
 }
+// ===== 二维码导航：新窗口打开（避免企业微信页面 bfcache 导致第二次长按失效） =====
+function navigateToQR(url) {
+  var finalUrl = url + (url.indexOf('?') > -1 ? '&' : '?') + '_t=' + Date.now();
+  try {
+    var a = document.createElement('a');
+    a.href = finalUrl;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    return;
+  } catch(e) {}
+  location.href = finalUrl;
+}
 function showQRModal(imgId) {
   var img = document.getElementById(imgId);
   if (!img || !img.src) return;
   // 1. 直接解码（图片已正常加载的情况）
   var url = decodeQRFromImg(img);
-  if (url) { location.href = url + (url.indexOf('?') > -1 ? '&' : '?') + '_t=' + Date.now(); return; }
+  if (url) { navigateToQR(url); return; }
   // 2. 图片存在但解码失败（bfcache 快照恢复后图片状态异常）
   //    新建 Image 对象强制重新加载（加缓存破坏参数），再解码一次
   var cleanSrc = img.src.indexOf('?') > -1 ? img.src.split('?')[0] : img.src;
   var temp = new Image();
   temp.onload = function() {
     var url2 = decodeQRFromImg(temp);
-    if (url2) { location.href = url2 + (url2.indexOf('?') > -1 ? '&' : '?') + '_t=' + Date.now(); return; }
+    if (url2) { navigateToQR(url2); return; }
     // 仍然解码不出 → 弹窗兜底
     _showQRWithModal(img);
   };
@@ -1591,7 +1602,7 @@ function tryDecodeQR(imgEl) {
     var d = ctx.getImageData(0, 0, c.width, c.height);
     var code = jsQR(d.data, d.width, d.height);
     if (code && code.data && code.data.indexOf('http') === 0) {
-      location.href = code.data + (code.data.indexOf('?') > -1 ? '&' : '?') + '_t=' + Date.now();
+      navigateToQR(code.data);
     }
   } catch(e) {}
 }
