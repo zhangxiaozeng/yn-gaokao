@@ -16,10 +16,15 @@
     url = (url + sep + '_t=' + Date.now()).replace(hash, '') + hash;
     window.location.replace(url);
   }
-  // ===== 微信 bfcache 快照恢复：不强制刷新页面，showQRModal 内有 bfcache 图片恢复逻辑 =====
+  // ===== 微信 bfcache 快照恢复：强制刷新页面（微信长按识别需要图片真正重新加载） =====
   window.addEventListener('pageshow', function(ev) {
     if (ev.persisted) {
-      window.__FROM_BFCACHE__ = true;
+      var cur = window.location.href;
+      var sep = cur.indexOf('?') > -1 ? '&' : '?';
+      var hash = window.location.hash;
+      cur = cur.replace(/[?&]_t=[^&]*/g, '');
+      cur = (cur + sep + '_t=' + Date.now()).replace(hash, '') + hash;
+      window.location.replace(cur);
     }
   });
 })();
@@ -1489,7 +1494,7 @@ function previewLandingPage() {
   };
 })();
 
-// ===== 二维码弹窗（内联实现，同时加载 qrmodal.js 用于后续更新） =====
+// ===== 二维码弹窗 =====
 function dataURLToBlob(dataUrl) {
   try {
     var parts = dataUrl.split(',');
@@ -1501,7 +1506,7 @@ function dataURLToBlob(dataUrl) {
     return new Blob([u8arr], { type: mime });
   } catch(e) { return null; }
 }
-// ===== 二维码导航：新窗口打开（避免企业微信页面 bfcache 导致第二次长按失效） =====
+// ===== 二维码导航：新窗口打开（避免微信跳转触发 bfcache） =====
 function navigateToQR(url) {
   var finalUrl = url + (url.indexOf('?') > -1 ? '&' : '?') + '_t=' + Date.now();
   try {
@@ -1517,55 +1522,7 @@ function navigateToQR(url) {
   } catch(e) {}
   location.href = finalUrl;
 }
-function showQRModal(imgId) {
-  var img = document.getElementById(imgId);
-  if (!img || !img.src) return;
-  // 1. 直接解码（图片已正常加载的情况）
-  var url = decodeQRFromImg(img);
-  if (url) { navigateToQR(url); return; }
-  // 2. 图片存在但解码失败（bfcache 快照恢复后图片状态异常）
-  //    新建 Image 对象强制重新加载（加缓存破坏参数），再解码一次
-  var cleanSrc = img.src.indexOf('?') > -1 ? img.src.split('?')[0] : img.src;
-  var temp = new Image();
-  temp.onload = function() {
-    var url2 = decodeQRFromImg(temp);
-    if (url2) { navigateToQR(url2); return; }
-    // 仍然解码不出 → 弹窗兜底
-    _showQRWithModal(img);
-  };
-  temp.onerror = function() { _showQRWithModal(img); };
-  temp.src = cleanSrc + '?_qr=' + Date.now();
-}
-// ===== 弹窗兜底（非 URL 二维码 / CORS 限制） =====
-function _showQRWithModal(img) {
-  var overlay = document.getElementById('qrModalOverlay');
-  var modalImg = document.getElementById('qrModalImage');
-  if (!modalImg || !overlay) return;
-  if (img.src.indexOf('data:') === 0) {
-    var blob = dataURLToBlob(img.src);
-    modalImg.src = blob ? URL.createObjectURL(blob) : img.src;
-    overlay.style.display = 'flex';
-    setTimeout(function(){ tryDecodeQR(modalImg); }, 200);
-    return;
-  }
-  if (modalImg.src === img.src && modalImg.complete) {
-    overlay.style.display = 'flex';
-    setTimeout(function(){ tryDecodeQR(modalImg); }, 200);
-    return;
-  }
-  modalImg.onload = function() {
-    overlay.style.display = 'flex';
-    tryDecodeQR(modalImg);
-    modalImg.onload = null;
-    modalImg.onerror = null;
-  };
-  modalImg.onerror = function() {
-    overlay.style.display = 'flex';
-    modalImg.onerror = null;
-  };
-  modalImg.src = img.src;
-}
-// ===== 同步解码二维码图片，返回链接（或 null） =====
+// ===== 从 img 元素同步解码二维码 =====
 function decodeQRFromImg(imgEl) {
   if (!imgEl || !imgEl.complete || !imgEl.naturalWidth || typeof jsQR !== 'function') return null;
   var c = document.createElement('canvas');
@@ -1581,15 +1538,84 @@ function decodeQRFromImg(imgEl) {
   } catch(e) {}
   return null;
 }
+// ===== 主入口：点击查看大图 =====
+function showQRModal(imgId) {
+  var img = document.getElementById(imgId);
+  if (!img || !img.src) return;
+  // 1. 图片已加载 → 尝试解码跳转
+  var url = decodeQRFromImg(img);
+  if (url) { navigateToQR(url); return; }
+  // 2. 创建全新 Image 对象重建图片（绕过任何 bfcache 冻结状态）
+  _decodeFromFreshImage(img.src, function(decodedUrl) {
+    if (decodedUrl) { navigateToQR(decodedUrl); return; }
+    // 3. 解码失败 → 弹窗展示，并保证弹窗内图片是全新加载的
+    _showQRWithFreshImage(img.src);
+  });
+}
+// ===== 从图片源重建新 Image 尝试解码 =====
+function _decodeFromFreshImage(src, callback) {
+  if (src.indexOf('data:') === 0) {
+    // data URL → 转 blob URL 创建新 Image（绕过 bfcache 冻结）
+    var blob = dataURLToBlob(src);
+    if (!blob) { callback(null); return; }
+    var fresh = new Image();
+    fresh.onload = function() {
+      callback(decodeQRFromImg(fresh));
+      URL.revokeObjectURL(fresh.src);
+    };
+    fresh.onerror = function() { callback(null); };
+    fresh.src = URL.createObjectURL(blob);
+  } else {
+    // HTTP URL → 加缓存破坏参数重载
+    var clean = src.indexOf('?') > -1 ? src.split('?')[0] : src;
+    var fresh = new Image();
+    fresh.onload = function() { callback(decodeQRFromImg(fresh)); };
+    fresh.onerror = function() { callback(null); };
+    fresh.src = clean + '?_qr=' + Date.now();
+  }
+}
+// ===== 弹窗展示（确保弹窗内图片也全新加载） =====
+function _showQRWithFreshImage(src) {
+  var overlay = document.getElementById('qrModalOverlay');
+  var modalImg = document.getElementById('qrModalImage');
+  if (!modalImg || !overlay) return;
+  // 清除上一次的 blob URL
+  if (modalImg.src && modalImg.src.indexOf('blob:') === 0) {
+    URL.revokeObjectURL(modalImg.src);
+    modalImg.src = '';
+  }
+  if (src.indexOf('data:') === 0) {
+    // data URL → blob URL 显示
+    var blob = dataURLToBlob(src);
+    modalImg.src = blob ? URL.createObjectURL(blob) : src;
+    overlay.style.display = 'flex';
+    setTimeout(function(){ tryDecodeQR(modalImg); }, 300);
+  } else {
+    // HTTP URL → 加缓存破坏参数保证新鲜
+    var clean = src.indexOf('?') > -1 ? src.split('?')[0] : src;
+    modalImg.onload = function() {
+      overlay.style.display = 'flex';
+      tryDecodeQR(modalImg);
+      modalImg.onload = null;
+      modalImg.onerror = null;
+    };
+    modalImg.onerror = function() {
+      overlay.style.display = 'flex';
+      modalImg.onerror = null;
+    };
+    modalImg.src = clean + '?_modal=' + Date.now();
+  }
+}
 function closeQRModal() {
   var o = document.getElementById('qrModalOverlay');
   if (o) o.style.display = 'none';
   var m = document.getElementById('qrModalImage');
-  if (m && m.src && m.src.indexOf('blob:') === 0) {
-    URL.revokeObjectURL(m.src);
+  if (m) {
+    if (m.src.indexOf('blob:') === 0) URL.revokeObjectURL(m.src);
+    m.src = '';  // 清空 src，下次打开强制重新加载
   }
 }
-// ===== 二维码解码（弹窗内兜底）：解码出链接直接跳转 =====
+// ===== 弹窗内二次解码兜底 =====
 function tryDecodeQR(imgEl) {
   if (typeof jsQR !== 'function' || !imgEl || !imgEl.naturalWidth || !imgEl.naturalHeight) return;
   var c = document.createElement('canvas');
@@ -1609,12 +1635,6 @@ function tryDecodeQR(imgEl) {
 </script>
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <script>
-// 动态加载 qrmodal.js（后续更新弹窗样式/逻辑用，Date.now() 不命中缓存）
-(function(){
-  var s = document.createElement('script');
-  s.src = 'qrmodal.js?_t=' + Date.now();
-  document.head.appendChild(s);
-})();
 
 // ===== Init =====
 document.addEventListener('DOMContentLoaded', () => {
