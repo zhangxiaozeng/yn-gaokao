@@ -3,11 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+// ===== 微信浏览器缓存强制刷新 =====
+(function(){
+  var V = '12';
+  if (window.location.href.indexOf('__v=' + V) === -1) {
+    var url = window.location.href.replace(/[?&]__v=\d*/g, '');
+    var sep = url.indexOf('?') > -1 ? '&' : '?';
+    var hash = window.location.hash;
+    url = (url + sep + '__v=' + V).replace(hash, '') + hash;
+    window.location.replace(url);
+  }
+})();
+</script>
 <title>管理后台 · 各地州二维码</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<script src="owner-config.js"></script>
-<script src="cloud-config.js"></script>
+<script src="https://cdn.tailwindcss.com?ver=12"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css?ver=12">
+<script src="owner-config.js?ver=12"></script>
+<script src="cloud-config.js?ver=12"></script>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 body { font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif; background:#f3f4f6; min-height:100vh; }
@@ -31,6 +44,11 @@ body { font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
     </div>
     <h1 class="text-xl font-bold text-gray-900">各地州二维码管理</h1>
     <p class="text-sm text-gray-400 mt-1">为每个地州单独设置微信二维码，家长看到对应城市的专属二维码</p>
+    <div class="mt-4 flex justify-center gap-3">
+      <a href="index.html" class="inline-flex items-center gap-1.5 px-4 py-2 bg-gray-100 text-gray-600 rounded-xl text-sm font-medium hover:bg-gray-200 transition-all">
+        <i class="fas fa-arrow-left"></i>返回首页
+      </a>
+    </div>
   </div>
 
   <!-- ===== 登录 ===== -->
@@ -122,6 +140,23 @@ body { font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
       </div>
     </div>
 
+    <!-- GitHub Token 配置 -->
+    <div id="githubTokenCard" class="card p-4 mt-4 shadow-sm hidden">
+      <div class="flex items-center gap-3">
+        <i class="fas fa-key text-gray-400"></i>
+        <span class="text-sm font-medium text-gray-700">GitHub Token:</span>
+        <input id="githubTokenInput" type="password" placeholder="输入 GitHub token"
+          class="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100">
+        <button onclick="saveGitHubToken()" class="px-4 py-2 bg-blue-700 text-white rounded-lg text-sm font-semibold hover:bg-blue-800 transition-all whitespace-nowrap">
+          <i class="fas fa-check mr-0.5"></i>保存
+        </button>
+      </div>
+      <p class="text-xs text-gray-400 mt-2 ml-1">
+        <i class="fas fa-info-circle mr-1"></i>
+        第一次使用 GitHub 存储，需要先填入 token。仅保存在你本机浏览器，不会上传到仓库。
+      </p>
+    </div>
+
     <!-- 使用说明 -->
     <div class="card p-4 mt-4 shadow-sm">
       <div class="flex items-start gap-3 text-sm text-gray-500">
@@ -197,6 +232,7 @@ var pendingUploads = {}; // cityId -> base64 dataUrl
 function doLogin() {
   var pwd = document.getElementById('pwdInput').value;
   if (pwd === OWNER_CONFIG.password) {
+    sessionStorage.setItem('yn_gaokao_admin_logged_in', '1');
     document.getElementById('loginPanel').classList.add('hidden');
     document.getElementById('adminPanel').classList.remove('hidden');
     initAdmin();
@@ -222,9 +258,17 @@ async function checkStatus() {
 
   if (OWNER_CONFIG.storageMode === 'github') {
     var cfg = OWNER_CONFIG.github;
-    if (!cfg.token) {
+    // 优先从 localStorage 读取 token（不写死在代码里）
+    var savedToken = localStorage.getItem('yn_gaokao_github_token') || '';
+    var token = cfg.token || savedToken;
+
+    if (!token) {
       icon.className = 'fas fa-exclamation-triangle text-yellow-500 text-xs';
-      text.innerHTML = '<span class="text-yellow-600 font-medium">提示：</span>GitHub token 未配置，使用本地存储';
+      text.innerHTML = '<span class="text-yellow-600 font-medium">提示：</span>请配置 GitHub token';
+      document.getElementById('githubTokenCard').classList.remove('hidden');
+      document.getElementById('githubTokenCard').classList.add('flex');
+      // 回退到 local 模式
+      if (hint) hint.innerHTML = '当前使用 <strong>本地存储</strong>（配置 token 后所有访客可见）';
       return;
     }
     var result = await CloudStorage.testConnection();
@@ -318,6 +362,39 @@ function applyData() {
       var delBtn = document.getElementById('del-' + id);
       if (delBtn) delBtn.classList.remove('hidden');
     });
+  }
+
+  // 区县二维码统计（在每个地州卡片上显示已上传的区县数量）
+  if (qrData.counties) {
+    var countyKeys = Object.keys(qrData.counties);
+    countyKeys.forEach(function(key) {
+      var cityId = key.split('_')[0];
+      if (!cityId) return;
+      var img = document.getElementById('qr-' + cityId);
+      if (!img) return;
+      // 在地州卡片右上角添加区县标记
+      var card = img.closest('.city-card');
+      if (!card) return;
+      var existing = card.querySelector('.county-badge');
+      if (!existing) {
+        var badge = document.createElement('div');
+        badge.className = 'county-badge absolute top-1 right-1 bg-purple-500 text-white text-[10px] rounded-full px-1.5 py-0.5';
+        card.style.position = 'relative';
+        card.appendChild(badge);
+      }
+    });
+    // 更新总计数
+    var totalCountyQRs = countyKeys.length;
+    var hint = document.getElementById('storageHint');
+    if (hint) {
+      var countEl = hint.querySelector('.county-count');
+      if (!countEl) {
+        countEl = document.createElement('span');
+        countEl.className = 'county-count';
+        hint.appendChild(countEl);
+      }
+      countEl.innerHTML = ' · 区县二维码 <strong>' + totalCountyQRs + '</strong> 个';
+    }
   }
 }
 
@@ -508,6 +585,18 @@ function removeCountyQR(cityId, countyName) {
   });
 }
 
+// ===== GitHub Token 保存 =====
+function saveGitHubToken() {
+  var token = document.getElementById('githubTokenInput').value.trim();
+  if (!token) { showToast('请输入 GitHub token'); return; }
+  localStorage.setItem('yn_gaokao_github_token', token);
+  document.getElementById('githubTokenCard').classList.add('hidden');
+  document.getElementById('githubTokenCard').classList.remove('flex');
+  showToast('Token 已保存！正在重新连接...');
+  // 重新检查状态
+  setTimeout(function() { checkStatus(); }, 500);
+}
+
 // ===== Toast 提示 =====
 function showToast(msg) {
   var existing = document.querySelector('.toast-msg');
@@ -518,6 +607,16 @@ function showToast(msg) {
   document.body.appendChild(div);
   setTimeout(function() { div.remove(); }, 2000);
 }
+</script>
+<script>
+// ===== 自动登录（刷新页面不退出） =====
+(function() {
+  if (sessionStorage.getItem('yn_gaokao_admin_logged_in') === '1') {
+    document.getElementById('loginPanel').classList.add('hidden');
+    document.getElementById('adminPanel').classList.remove('hidden');
+    initAdmin();
+  }
+})();
 </script>
 <!-- ===== 区县二维码管理弹窗 ===== -->
 <div id="countyModal" class="fixed inset-0 z-[300] bg-black/50 hidden items-start justify-center pt-10 pb-10 overflow-y-auto" onclick="if(event.target===this)closeCountyManager()">

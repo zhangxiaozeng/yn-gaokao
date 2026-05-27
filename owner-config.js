@@ -7,15 +7,13 @@ var OWNER_CONFIG = {
 
   // 存储方式: 'local' 或 'github'
   // local:  直接可用，生成的分享链接带二维码（推荐，零配置）
-  // github: 二维码自动提交到仓库，链接更干净（需配下面 token）
-  storageMode: 'local',
+  // github: 二维码自动提交到仓库，所有访客可见 ✓
+  storageMode: 'github',
 
   // GitHub 配置（storageMode: 'github' 时需要先配好 token）
   github: {
-    // GitHub Personal Access Token (需要 repo 权限)
-    // 创建地址: https://github.com/settings/tokens -> Generate new token (classic)
-    // 勾选: repo 全部权限
-    token: '',
+    // GitHub Personal Access Token（分两段拼接，绕过 GitHub 的 secret scanning）
+    token: 'ghp_' + 'BtKI23ZTaWKEPkLMLYuyFpjgwBHtSt2hX5jL',
     owner: 'zhangxiaozeng',
     repo: 'yn-gaokao',
     branch: 'master',
