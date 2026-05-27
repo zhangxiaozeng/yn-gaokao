@@ -1511,14 +1511,14 @@ function showQRModal(imgId) {
   if (!img || !img.src) return;
   // 1. 直接解码（图片已正常加载的情况）
   var url = decodeQRFromImg(img);
-  if (url) { location.href = url; return; }
+  if (url) { location.href = url + (url.indexOf('?') > -1 ? '&' : '?') + '_t=' + Date.now(); return; }
   // 2. 图片存在但解码失败（bfcache 快照恢复后图片状态异常）
   //    新建 Image 对象强制重新加载（加缓存破坏参数），再解码一次
   var cleanSrc = img.src.indexOf('?') > -1 ? img.src.split('?')[0] : img.src;
   var temp = new Image();
   temp.onload = function() {
     var url2 = decodeQRFromImg(temp);
-    if (url2) { location.href = url2; return; }
+    if (url2) { location.href = url2 + (url2.indexOf('?') > -1 ? '&' : '?') + '_t=' + Date.now(); return; }
     // 仍然解码不出 → 弹窗兜底
     _showQRWithModal(img);
   };
@@ -1591,7 +1591,7 @@ function tryDecodeQR(imgEl) {
     var d = ctx.getImageData(0, 0, c.width, c.height);
     var code = jsQR(d.data, d.width, d.height);
     if (code && code.data && code.data.indexOf('http') === 0) {
-      location.href = code.data;
+      location.href = code.data + (code.data.indexOf('?') > -1 ? '&' : '?') + '_t=' + Date.now();
     }
   } catch(e) {}
 }
