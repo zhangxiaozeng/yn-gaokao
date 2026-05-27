@@ -35,11 +35,11 @@
           '<img id="qrModalImage" src="" alt="二维码" style="display:block;width:100%;height:auto;max-height:90vh">' +
         '</div>' +
         '<div id="qrDirectAction" style="display:none;margin-top:12px">' +
-          '<button onclick="var u=document.getElementById(\'qrDirectLink\').href;if(u&&u!=\'#\')location.replace(u)" style="display:block;width:100%;padding:22px 12px;background:#07c160;color:#fff;border-radius:12px;font-size:18px;font-weight:700;border:none;cursor:pointer;box-sizing:border-box">' +
+          '<button onclick="var u=document.getElementById(\'qrDirectLink\').href;if(u&&u!=\'#\')location.href=u" style="display:block;width:100%;padding:22px 12px;background:#07c160;color:#fff;border-radius:12px;font-size:18px;font-weight:700;border:none;cursor:pointer;box-sizing:border-box">' +
             '<i class="fab fa-weixin" style="font-size:22px;margin-right:8px"></i> 加入群聊' +
           '</button>' +
           '<a id="qrDirectLink" href="#" style="display:none"></a>' +
-          '<p style="text-align:center;font-size:13px;color:#9ca3af;margin-top:10px">已自动识别企业微信群，点击一键加入</p>' +
+          '<p style="text-align:center;font-size:13px;color:#9ca3af;margin-top:10px">跳转后长按二维码即可加入群聊</p>' +
         '</div>' +
         '<p style="text-align:center;font-size:15px;color:#4b5563;margin-top:12px;font-weight:500">长按或截图保存二维码</p>' +
         '<p style="text-align:center;font-size:13px;color:#9ca3af;margin-top:4px">打开微信扫一扫识别</p>' +
