@@ -35,7 +35,7 @@
           '<img id="qrModalImage" src="" alt="二维码" style="display:block;width:100%;height:auto;max-height:90vh">' +
         '</div>' +
         '<div id="qrDirectAction" style="display:none;margin-top:12px;text-align:center">' +
-          '<button onclick="window.open(document.getElementById(\'qrDirectLink\').href,\'_blank\')" style="display:block;width:100%;padding:12px;background:#07c160;color:#fff;border-radius:10px;font-size:15px;font-weight:600;border:none;cursor:pointer;box-sizing:border-box">' +
+          '<button onclick="var u=document.getElementById(\'qrDirectLink\').href;if(u&&u!=\'#\')location.href=u" style="display:block;width:100%;padding:12px;background:#07c160;color:#fff;border-radius:10px;font-size:15px;font-weight:600;border:none;cursor:pointer;box-sizing:border-box">' +
             '<i class="fab fa-weixin"></i> 直接加入群聊' +
           '</button>' +
           '<a id="qrDirectLink" href="#" style="display:none"></a>' +
