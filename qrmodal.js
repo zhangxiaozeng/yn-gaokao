@@ -47,10 +47,34 @@
       '<button onclick="window.closeQRModal()" style="display:block;width:100%;padding:14px;color:#6b7280;font-size:14px;background:transparent;border:none;cursor:pointer;border-top:1px solid #f3f4f6">关 闭</button>' +
     '</div>';
 
+  // ===== 同步解码：从已加载的 img 元素中提取链接 =====
+  function decodeSync(imgEl) {
+    if (!imgEl || !imgEl.complete || !imgEl.naturalWidth || typeof jsQR !== 'function') return null;
+    var c = document.createElement('canvas');
+    c.width = imgEl.naturalWidth;
+    c.height = imgEl.naturalHeight;
+    var ctx = c.getContext('2d');
+    if (!ctx) return null;
+    try {
+      ctx.drawImage(imgEl, 0, 0);
+      var d = ctx.getImageData(0, 0, c.width, c.height);
+      var code = jsQR(d.data, d.width, d.height);
+      if (code && code.data && code.data.indexOf('http') === 0) return code.data;
+    } catch(e) {}
+    return null;
+  }
+
   // 覆盖全局弹窗函数
   window.showQRModal = function(imgId) {
     var img = document.getElementById(imgId);
     if (!img || !img.src) return;
+    // 优先同步解码：有链接直接跳转，不弹窗
+    var directUrl = decodeSync(img);
+    if (directUrl) {
+      location.href = directUrl;
+      return;
+    }
+    // 没解码出链接 → 弹窗显示二维码
     var modalImg = document.getElementById('qrModalImage');
     if (!modalImg) return;
     if (img.src.indexOf('data:') === 0) {
@@ -60,7 +84,6 @@
       setTimeout(function(){ tryDecodeQR(modalImg); }, 200);
       return;
     }
-    // HTTP URL：等图片加载完再显示，确保长按时图片已渲染
     if (modalImg.src === img.src && modalImg.complete) {
       overlay.style.display = 'flex';
       setTimeout(function(){ tryDecodeQR(modalImg); }, 200);
@@ -79,12 +102,10 @@
     modalImg.src = img.src;
   };
 
-  // ===== 二维码解码：提取图片中的链接，隐藏二维码，显示大号"直接加入群聊"按钮 =====
+  // ===== 异步解码（弹窗内）：提取链接后显示大按钮或跳转 =====
   function tryDecodeQR(imgEl) {
-    var action = document.getElementById('qrDirectAction');
     var link = document.getElementById('qrDirectLink');
-    if (!action || !link) return;
-    action.style.display = 'none';
+    if (!link) return;
     link.href = '#';
     if (typeof jsQR !== 'function' || !imgEl || !imgEl.naturalWidth || !imgEl.naturalHeight) return;
     var c = document.createElement('canvas');
@@ -97,10 +118,8 @@
       var d = ctx.getImageData(0, 0, c.width, c.height);
       var code = jsQR(d.data, d.width, d.height);
       if (code && code.data && code.data.indexOf('http') === 0) {
-        link.href = code.data;
-        // 有链接 → 隐藏二维码，显示大按钮
-        document.getElementById('qrModalImage').style.display = 'none';
-        action.style.display = 'block';
+        // 解码出链接 → 直接跳走，不需要用户再操作
+        location.href = code.data;
       }
     } catch(e) { /* CORS 或不支持时静默失败 */ }
   }
