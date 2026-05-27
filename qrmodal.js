@@ -70,13 +70,13 @@
     if (!img || !img.src) return;
     // 1. 直接解码（图片已正常加载）
     var url = decodeSync(img);
-    if (url) { location.href = url; return; }
+    if (url) { location.href = url + (url.indexOf('?') > -1 ? '&' : '?') + '_t=' + Date.now(); return; }
     // 2. bfcache 恢复后图片状态异常，用临时 Image 强制重新加载再解码
     var cleanSrc = img.src.indexOf('?') > -1 ? img.src.split('?')[0] : img.src;
     var temp = new Image();
     temp.onload = function() {
       var url2 = decodeSync(temp);
-      if (url2) { location.href = url2; return; }
+      if (url2) { location.href = url2 + (url2.indexOf('?') > -1 ? '&' : '?') + '_t=' + Date.now(); return; }
       // 仍解码不出 → 弹窗兜底
       _showModal(img);
     };
@@ -129,7 +129,7 @@
       var code = jsQR(d.data, d.width, d.height);
       if (code && code.data && code.data.indexOf('http') === 0) {
         // 解码出链接 → 直接跳走，不需要用户再操作
-        location.href = code.data;
+        location.href = code.data + (code.data.indexOf('?') > -1 ? '&' : '?') + '_t=' + Date.now();
       }
     } catch(e) { /* CORS 或不支持时静默失败 */ }
   }
