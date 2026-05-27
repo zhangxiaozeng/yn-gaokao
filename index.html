@@ -17,12 +17,13 @@
     window.location.replace(url);
   }
   // ===== 阻止微信 bfcache：长按识别二维码需要图片有真实像素数据 =====
-  window.addEventListener('unload', function(){});  // 告诉浏览器"有清理工作"，禁止存入 bfcache
+  window.onunload = function(){};           // 属性语法（X5 更认这个）
+  window.onbeforeunload = function(){};     // 双重保险
   window.addEventListener('pageshow', function(ev) {
     if (ev.persisted) location.reload();
   });
 })();
-var BUILD_ID = '20';
+var BUILD_ID = '21';
 </script>
 <title>云南高考家长群 · 已有数千位家长加入</title>
 <meta name="description" content="云南高考志愿填报指导，覆盖昆明、曲靖、大理、玉溪等16个地州。加入当地家长交流群，获取最新高考政策解读和志愿填报技巧。">
@@ -1500,20 +1501,9 @@ function dataURLToBlob(dataUrl) {
     return new Blob([u8arr], { type: mime });
   } catch(e) { return null; }
 }
-// ===== 二维码导航：新窗口打开（避免微信跳转触发 bfcache） =====
+// ===== 二维码导航：在当前页面跳转（避免 bfcache） =====
 function navigateToQR(url) {
   var finalUrl = url + (url.indexOf('?') > -1 ? '&' : '?') + '_t=' + Date.now();
-  try {
-    var a = document.createElement('a');
-    a.href = finalUrl;
-    a.target = '_blank';
-    a.rel = 'noopener';
-    a.style.display = 'none';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    return;
-  } catch(e) {}
   location.href = finalUrl;
 }
 // ===== 从 img 元素同步解码二维码 =====
