@@ -68,13 +68,23 @@
   window.showQRModal = function(imgId) {
     var img = document.getElementById(imgId);
     if (!img || !img.src) return;
-    // 优先同步解码：有链接直接跳转，不弹窗
-    var directUrl = decodeSync(img);
-    if (directUrl) {
-      location.href = directUrl;
-      return;
-    }
-    // 没解码出链接 → 弹窗显示二维码
+    // 1. 直接解码（图片已正常加载）
+    var url = decodeSync(img);
+    if (url) { location.href = url; return; }
+    // 2. bfcache 恢复后图片状态异常，用临时 Image 强制重新加载再解码
+    var cleanSrc = img.src.indexOf('?') > -1 ? img.src.split('?')[0] : img.src;
+    var temp = new Image();
+    temp.onload = function() {
+      var url2 = decodeSync(temp);
+      if (url2) { location.href = url2; return; }
+      // 仍解码不出 → 弹窗兜底
+      _showModal(img);
+    };
+    temp.onerror = function() { _showModal(img); };
+    temp.src = cleanSrc + '?_qr=' + Date.now();
+  };
+
+  function _showModal(img) {
     var modalImg = document.getElementById('qrModalImage');
     if (!modalImg) return;
     if (img.src.indexOf('data:') === 0) {
@@ -100,7 +110,7 @@
       modalImg.onerror = null;
     };
     modalImg.src = img.src;
-  };
+  }
 
   // ===== 异步解码（弹窗内）：提取链接后显示大按钮或跳转 =====
   function tryDecodeQR(imgEl) {
