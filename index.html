@@ -1509,6 +1509,13 @@ function dataURLToBlob(dataUrl) {
 function showQRModal(imgId) {
   var img = document.getElementById(imgId);
   if (!img || !img.src) return;
+  // 先尝试同步解码：如果二维码包含链接，直接跳转，不弹窗
+  var directUrl = decodeQRFromImg(img);
+  if (directUrl) {
+    location.href = directUrl;
+    return;
+  }
+  // 没解码出链接（非 URL 二维码/图片未加载/CORS）→ 弹窗显示二维码
   var overlay = document.getElementById('qrModalOverlay');
   var modalImg = document.getElementById('qrModalImage');
   if (!modalImg || !overlay) return;
@@ -1519,7 +1526,6 @@ function showQRModal(imgId) {
     setTimeout(function(){ tryDecodeQR(modalImg); }, 200);
     return;
   }
-  // HTTP URL：等图片加载完再显示弹窗，确保长按时图片已渲染
   if (modalImg.src === img.src && modalImg.complete) {
     overlay.style.display = 'flex';
     setTimeout(function(){ tryDecodeQR(modalImg); }, 200);
@@ -1537,6 +1543,22 @@ function showQRModal(imgId) {
   };
   modalImg.src = img.src;
 }
+// ===== 同步解码二维码图片，返回链接（或 null） =====
+function decodeQRFromImg(imgEl) {
+  if (!imgEl || !imgEl.complete || !imgEl.naturalWidth || typeof jsQR !== 'function') return null;
+  var c = document.createElement('canvas');
+  c.width = imgEl.naturalWidth;
+  c.height = imgEl.naturalHeight;
+  var ctx = c.getContext('2d');
+  if (!ctx) return null;
+  try {
+    ctx.drawImage(imgEl, 0, 0);
+    var d = ctx.getImageData(0, 0, c.width, c.height);
+    var code = jsQR(d.data, d.width, d.height);
+    if (code && code.data && code.data.indexOf('http') === 0) return code.data;
+  } catch(e) {}
+  return null;
+}
 function closeQRModal() {
   var o = document.getElementById('qrModalOverlay');
   if (o) o.style.display = 'none';
@@ -1545,13 +1567,8 @@ function closeQRModal() {
     URL.revokeObjectURL(m.src);
   }
 }
-// ===== 二维码解码：提取二维码图片中的链接，显示"直接加入群聊"按钮 =====
+// ===== 二维码解码（弹窗内兜底）：解码出链接直接跳转 =====
 function tryDecodeQR(imgEl) {
-  var action = document.getElementById('qrDirectAction');
-  var link = document.getElementById('qrDirectLink');
-  if (!action || !link) return;
-  action.style.display = 'none';
-  link.href = '#';
   if (typeof jsQR !== 'function' || !imgEl || !imgEl.naturalWidth || !imgEl.naturalHeight) return;
   var c = document.createElement('canvas');
   c.width = imgEl.naturalWidth;
@@ -1563,9 +1580,7 @@ function tryDecodeQR(imgEl) {
     var d = ctx.getImageData(0, 0, c.width, c.height);
     var code = jsQR(d.data, d.width, d.height);
     if (code && code.data && code.data.indexOf('http') === 0) {
-      link.href = code.data;
-      document.getElementById('qrModalImage').style.display = 'none';
-      action.style.display = 'block';
+      location.href = code.data;
     }
   } catch(e) {}
 }
