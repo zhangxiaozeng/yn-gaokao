@@ -9,24 +9,35 @@
 <script>
 // ===== 微信缓存穿透：每次打开都用 Date.now() 生成独立 URL（不走缓存） =====
 (function(){
-  if (window.location.href.indexOf('_t=') === -1) {
-    var url = window.location.href.replace(/[?&]_t=[^&]*/g, '');
+  var url = window.location.href;
+  if (url.indexOf('_t=') === -1) {
     var sep = url.indexOf('?') > -1 ? '&' : '?';
     var hash = window.location.hash;
     url = (url + sep + '_t=' + Date.now()).replace(hash, '') + hash;
     window.location.replace(url);
   }
+  // ===== 微信 bfcache 快照恢复检测：从页面快照回来时强制刷新 =====
+  window.addEventListener('pageshow', function(ev) {
+    if (ev.persisted) {
+      var cur = window.location.href;
+      var sep = cur.indexOf('?') > -1 ? '&' : '?';
+      var hash = window.location.hash;
+      cur = cur.replace(/[?&]_t=[^&]*/g, '');
+      cur = (cur + sep + '_t=' + Date.now()).replace(hash, '') + hash;
+      window.location.replace(cur);
+    }
+  });
 })();
-var BUILD_ID = '16';
+var BUILD_ID = '17';
 </script>
 <title>云南高考家长群 · 已有数千位家长加入</title>
 <meta name="description" content="云南高考志愿填报指导，覆盖昆明、曲靖、大理、玉溪等16个地州。加入当地家长交流群，获取最新高考政策解读和志愿填报技巧。">
 <meta name="keywords" content="云南高考志愿填报,高考志愿指导,云南家长群,高考咨询">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
-<script src="https://cdn.tailwindcss.com?ver=16"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css?ver=16">
-<script src="owner-config.js?ver=16"></script>
-<script src="cloud-config.js?ver=16"></script>
+<script src="https://cdn.tailwindcss.com?ver=17"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css?ver=17">
+<script src="owner-config.js?ver=17"></script>
+<script src="cloud-config.js?ver=17"></script>
 <script>
 tailwind.config = {
   theme: {
@@ -603,13 +614,13 @@ details.benefit-card summary { list-style:none; }
       <div class="flex flex-wrap justify-center gap-6">
         <div>
           <div class="w-36 h-36 mx-auto rounded-xl overflow-hidden border border-gray-200 shadow-sm cursor-pointer hover:ring-2 hover:ring-brand-200 transition-all" onclick="showQRModal('qrcode-main')">
-            <img id="qrcode-main" src="二维码.jpg" alt="微信二维码" class="w-full h-full object-cover">
+            <img id="qrcode-main" src="二维码.jpg" alt="微信二维码" class="w-full h-full object-contain">
           </div>
           <p class="mt-3 text-center text-sm text-gray-500">微信①</p>
         </div>
         <div>
           <div class="w-36 h-36 mx-auto rounded-xl overflow-hidden border border-gray-200 shadow-sm cursor-pointer hover:ring-2 hover:ring-brand-200 transition-all" onclick="showQRModal('qrcode-main2')">
-            <img id="qrcode-main2" src="二维码.jpg" alt="微信二维码2" class="w-full h-full object-cover">
+            <img id="qrcode-main2" src="二维码.jpg" alt="微信二维码2" class="w-full h-full object-contain">
           </div>
           <p class="mt-3 text-center text-sm text-gray-500">微信②</p>
         </div>
@@ -696,7 +707,7 @@ details.benefit-card summary { list-style:none; }
   <div style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 25px 60px rgba(0,0,0,0.4);width:100%;max-width:340px" onclick="event.stopPropagation()">
     <div style="padding:16px">
       <div style="width:100%;background:#fff;border-radius:12px;overflow:hidden;display:flex;align-items:center;justify-content:center">
-        <img id="qrModalImage" src="" alt="二维码" style="display:block;width:100%;height:auto;max-height:75vh">
+        <img id="qrModalImage" src="" alt="二维码" style="display:block;width:100%;height:auto;max-height:90vh">
       </div>
       <p style="text-align:center;font-size:15px;color:#4b5563;margin-top:16px;font-weight:500">长按或截图保存二维码</p>
       <p style="text-align:center;font-size:13px;color:#9ca3af;margin-top:4px">打开微信扫一扫识别</p>
@@ -938,8 +949,8 @@ function showCity(cityId) {
       <div class="border-t border-gray-100 pt-8 text-center">
         <p class="font-semibold text-gray-800 mb-1">加入 ${city.name} <span id="county-label">家长群</span></p>
         <p class="text-sm text-gray-400 mb-4" id="county-hint">扫码加微信 · 备注"${city.short}家长"即可进群</p>
-        <div class="w-28 h-28 mx-auto rounded-xl overflow-hidden border border-gray-200 shadow-sm">
-          <img id="qrcode-city-${city.id}" src="二维码.jpg" alt="微信二维码" class="w-full h-full object-cover">
+        <div class="w-36 h-36 mx-auto rounded-xl overflow-hidden border border-gray-200 shadow-sm">
+          <img id="qrcode-city-${city.id}" src="二维码.jpg" alt="微信二维码" class="w-full h-full object-contain">
         </div>
         <div class="mt-4 flex flex-wrap justify-center gap-3">
           <button onclick="showQRModal('qrcode-city-${city.id}')" class="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-700 text-white rounded-xl text-sm font-semibold hover:bg-brand-800 transition-all shadow-sm cursor-pointer">
@@ -1491,15 +1502,30 @@ function dataURLToBlob(dataUrl) {
 function showQRModal(imgId) {
   var img = document.getElementById(imgId);
   if (!img || !img.src) return;
+  var overlay = document.getElementById('qrModalOverlay');
   var modalImg = document.getElementById('qrModalImage');
-  if (!modalImg) return;
+  if (!modalImg || !overlay) return;
   if (img.src.indexOf('data:') === 0) {
     var blob = dataURLToBlob(img.src);
     modalImg.src = blob ? URL.createObjectURL(blob) : img.src;
-  } else {
-    modalImg.src = img.src;
+    overlay.style.display = 'flex';
+    return;
   }
-  document.getElementById('qrModalOverlay').style.display = 'flex';
+  // HTTP URL：等图片加载完再显示弹窗，确保长按时图片已渲染
+  if (modalImg.src === img.src && modalImg.complete) {
+    overlay.style.display = 'flex';
+    return;
+  }
+  modalImg.onload = function() {
+    overlay.style.display = 'flex';
+    modalImg.onload = null;
+    modalImg.onerror = null;
+  };
+  modalImg.onerror = function() {
+    overlay.style.display = 'flex';
+    modalImg.onerror = null;
+  };
+  modalImg.src = img.src;
 }
 function closeQRModal() {
   var o = document.getElementById('qrModalOverlay');
