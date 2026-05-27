@@ -7,18 +7,16 @@
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script>
-// ===== 微信浏览器缓存强制刷新（必须放在最前面） =====
+// ===== 微信缓存穿透：每次打开都用 Date.now() 生成独立 URL（不走缓存） =====
 (function(){
-  var V = '16';
-  if (window.location.href.indexOf('__v=' + V) === -1) {
-    var url = window.location.href.replace(/[?&]__v=\d*/g, '');
+  if (window.location.href.indexOf('_t=') === -1) {
+    var url = window.location.href.replace(/[?&]_t=[^&]*/g, '');
     var sep = url.indexOf('?') > -1 ? '&' : '?';
     var hash = window.location.hash;
-    url = (url + sep + '__v=' + V).replace(hash, '') + hash;
+    url = (url + sep + '_t=' + Date.now()).replace(hash, '') + hash;
     window.location.replace(url);
   }
 })();
-// 版本号，用于静态资源缓存控制
 var BUILD_ID = '16';
 </script>
 <title>云南高考家长群 · 已有数千位家长加入</title>
@@ -693,8 +691,19 @@ details.benefit-card summary { list-style:none; }
 
 </div> <!-- /landingMode -->
 
-<!-- ========== 二维码弹窗 ========== -->
-<!-- 二维码弹窗由 qrmodal.js 动态创建，确保每次都加载最新版本 -->
+<!-- ========== 二维码弹窗（内联style，缓存不影响） ========== -->
+<div id="qrModalOverlay" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.85);-webkit-backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:16px" onclick="closeQRModal()">
+  <div style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 25px 60px rgba(0,0,0,0.4);width:100%;max-width:340px" onclick="event.stopPropagation()">
+    <div style="padding:16px">
+      <div style="width:100%;background:#fff;border-radius:12px;overflow:hidden;display:flex;align-items:center;justify-content:center">
+        <img id="qrModalImage" src="" alt="二维码" style="display:block;width:100%;height:auto;max-height:75vh">
+      </div>
+      <p style="text-align:center;font-size:15px;color:#4b5563;margin-top:16px;font-weight:500">长按或截图保存二维码</p>
+      <p style="text-align:center;font-size:13px;color:#9ca3af;margin-top:4px">打开微信扫一扫识别</p>
+    </div>
+    <button onclick="closeQRModal()" style="display:block;width:100%;padding:14px;color:#6b7280;font-size:14px;background:transparent;border:none;cursor:pointer;border-top:1px solid #f3f4f6">关 闭</button>
+  </div>
+</div>
 
 <script>
 const CITIES = [
@@ -1467,17 +1476,44 @@ function previewLandingPage() {
   };
 })();
 
-// ===== 二维码弹窗（由 qrmodal.js 动态加载） =====
-// 占位函数：等 qrmodal.js 加载后替换
-window.__qrModalQueue = [];
-window.showQRModal = function(imgId) { window.__qrModalQueue.push(['show', imgId]); };
-window.closeQRModal = function() { window.__qrModalQueue.push(['close']); };
+// ===== 二维码弹窗（内联实现，同时加载 qrmodal.js 用于后续更新） =====
+function dataURLToBlob(dataUrl) {
+  try {
+    var parts = dataUrl.split(',');
+    var mime = parts[0].match(/:(.*?);/)[1];
+    var bstr = atob(parts[1]);
+    var n = bstr.length;
+    var u8arr = new Uint8Array(n);
+    while (n--) u8arr[n] = bstr.charCodeAt(n);
+    return new Blob([u8arr], { type: mime });
+  } catch(e) { return null; }
+}
+function showQRModal(imgId) {
+  var img = document.getElementById(imgId);
+  if (!img || !img.src) return;
+  var modalImg = document.getElementById('qrModalImage');
+  if (!modalImg) return;
+  if (img.src.indexOf('data:') === 0) {
+    var blob = dataURLToBlob(img.src);
+    modalImg.src = blob ? URL.createObjectURL(blob) : img.src;
+  } else {
+    modalImg.src = img.src;
+  }
+  document.getElementById('qrModalOverlay').style.display = 'flex';
+}
+function closeQRModal() {
+  var o = document.getElementById('qrModalOverlay');
+  if (o) o.style.display = 'none';
+  var modalImg = document.getElementById('qrModalImage');
+  if (modalImg && modalImg.src && modalImg.src.indexOf('blob:') === 0) {
+    URL.revokeObjectURL(modalImg.src);
+  }
+}
 
-// 动态加载 qrmodal.js（Date.now() 确保不命中缓存，解决微信页面缓存问题）
+// 动态加载 qrmodal.js（后续更新弹窗样式/逻辑用，Date.now() 不命中缓存）
 (function(){
-  var t = Date.now();
   var s = document.createElement('script');
-  s.src = 'qrmodal.js?_t=' + t;
+  s.src = 'qrmodal.js?_t=' + Date.now();
   document.head.appendChild(s);
 })();
 
