@@ -9,7 +9,7 @@
 <script>
 // ===== 微信浏览器缓存强制刷新（必须放在最前面） =====
 (function(){
-  var V = '15';
+  var V = '16';
   if (window.location.href.indexOf('__v=' + V) === -1) {
     var url = window.location.href.replace(/[?&]__v=\d*/g, '');
     var sep = url.indexOf('?') > -1 ? '&' : '?';
@@ -19,16 +19,16 @@
   }
 })();
 // 版本号，用于静态资源缓存控制
-var BUILD_ID = '15';
+var BUILD_ID = '16';
 </script>
 <title>云南高考家长群 · 已有数千位家长加入</title>
 <meta name="description" content="云南高考志愿填报指导，覆盖昆明、曲靖、大理、玉溪等16个地州。加入当地家长交流群，获取最新高考政策解读和志愿填报技巧。">
 <meta name="keywords" content="云南高考志愿填报,高考志愿指导,云南家长群,高考咨询">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
-<script src="https://cdn.tailwindcss.com?ver=15"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css?ver=15">
-<script src="owner-config.js?ver=15"></script>
-<script src="cloud-config.js?ver=15"></script>
+<script src="https://cdn.tailwindcss.com?ver=16"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css?ver=16">
+<script src="owner-config.js?ver=16"></script>
+<script src="cloud-config.js?ver=16"></script>
 <script>
 tailwind.config = {
   theme: {
@@ -694,18 +694,7 @@ details.benefit-card summary { list-style:none; }
 </div> <!-- /landingMode -->
 
 <!-- ========== 二维码弹窗 ========== -->
-<div id="qrModalOverlay" class="fixed inset-0 z-[200] bg-black/80 hidden items-center justify-center px-5" onclick="closeQRModal()">
-  <div class="bg-white rounded-2xl overflow-hidden shadow-2xl w-full max-w-xs" onclick="event.stopPropagation()">
-    <div class="p-4">
-      <div class="w-full overflow-hidden rounded-xl bg-white flex items-center justify-center">
-        <img id="qrModalImage" src="" alt="二维码" class="w-full h-auto" style="display:block;max-height:70vh">
-      </div>
-      <p class="text-center text-sm text-gray-600 mt-4 font-medium">长按或截图保存二维码</p>
-      <p class="text-center text-xs text-gray-400 mt-1">打开微信扫一扫识别</p>
-    </div>
-    <button onclick="closeQRModal()" class="w-full py-3 text-gray-500 text-sm font-medium border-t border-gray-100 hover:bg-gray-50 transition-colors text-center">关 闭</button>
-  </div>
-</div>
+<!-- 二维码弹窗由 qrmodal.js 动态创建，确保每次都加载最新版本 -->
 
 <script>
 const CITIES = [
@@ -1478,47 +1467,19 @@ function previewLandingPage() {
   };
 })();
 
-// ===== 二维码弹窗 =====
-// base64 转 blob（微信长按识别需要 blob URL，不支持 data: URL）
-function dataURLToBlob(dataUrl) {
-  try {
-    var parts = dataUrl.split(',');
-    var mime = parts[0].match(/:(.*?);/)[1];
-    var bstr = atob(parts[1]);
-    var n = bstr.length;
-    var u8arr = new Uint8Array(n);
-    while (n--) u8arr[n] = bstr.charCodeAt(n);
-    return new Blob([u8arr], { type: mime });
-  } catch(e) { return null; }
-}
+// ===== 二维码弹窗（由 qrmodal.js 动态加载） =====
+// 占位函数：等 qrmodal.js 加载后替换
+window.__qrModalQueue = [];
+window.showQRModal = function(imgId) { window.__qrModalQueue.push(['show', imgId]); };
+window.closeQRModal = function() { window.__qrModalQueue.push(['close']); };
 
-function showQRModal(imgId) {
-  var img = document.getElementById(imgId);
-  if (!img || !img.src) return;
-  var modalImg = document.getElementById('qrModalImage');
-  // base64 转 blob URL（微信长按识别二维码需要）
-  if (img.src.indexOf('data:') === 0) {
-    var blob = dataURLToBlob(img.src);
-    if (blob) {
-      modalImg.src = URL.createObjectURL(blob);
-    } else {
-      modalImg.src = img.src;
-    }
-  } else {
-    modalImg.src = img.src;
-  }
-  document.getElementById('qrModalOverlay').classList.remove('hidden');
-  document.getElementById('qrModalOverlay').classList.add('flex');
-}
-function closeQRModal() {
-  document.getElementById('qrModalOverlay').classList.add('hidden');
-  document.getElementById('qrModalOverlay').classList.remove('flex');
-  // 释放 blob URL
-  var modalImg = document.getElementById('qrModalImage');
-  if (modalImg.src && modalImg.src.indexOf('blob:') === 0) {
-    URL.revokeObjectURL(modalImg.src);
-  }
-}
+// 动态加载 qrmodal.js（Date.now() 确保不命中缓存，解决微信页面缓存问题）
+(function(){
+  var t = Date.now();
+  var s = document.createElement('script');
+  s.src = 'qrmodal.js?_t=' + t;
+  document.head.appendChild(s);
+})();
 
 // ===== Init =====
 document.addEventListener('DOMContentLoaded', () => {
