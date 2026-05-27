@@ -22,7 +22,7 @@
     if (ev.persisted) location.reload();
   });
 })();
-var BUILD_ID = '19';
+var BUILD_ID = '20';
 </script>
 <title>云南高考家长群 · 已有数千位家长加入</title>
 <meta name="description" content="云南高考志愿填报指导，覆盖昆明、曲靖、大理、玉溪等16个地州。加入当地家长交流群，获取最新高考政策解读和志愿填报技巧。">
@@ -1532,18 +1532,25 @@ function decodeQRFromImg(imgEl) {
   } catch(e) {}
   return null;
 }
-// ===== 主入口：点击查看大图（每次都是全新下载，和第一次完全一样） =====
+// ===== 主入口：点击查看大图（全新 img 元素 + 时间戳，每次和第一次完全一样） =====
 function showQRModal(imgId) {
   var img = document.getElementById(imgId);
   if (!img || !img.src) return;
-  // 每次都重新下载原始图片数据 → Blob URL → 解码，不碰 DOM img
+  // 1. 先尝试 jsQR 自动解码
   _fetchAsBlob(img.src, function(blob) {
-    if (!blob) { _showQRWithFreshImage(img.src); return; }
-    _decodeBlob(blob, function(url) {
-      if (url) { navigateToQR(url); return; }
-      _showQRWithFreshImage(blob);
-    });
+    if (blob) {
+      var fresh = new Image();
+      fresh.onload = function() {
+        var url = decodeQRFromImg(fresh);
+        URL.revokeObjectURL(fresh.src);
+        if (url) { navigateToQR(url); return; }
+      };
+      fresh.onerror = function() {};
+      fresh.src = URL.createObjectURL(blob);
+    }
   });
+  // 2. 展示弹窗：全新 img 元素 + HTTP 时间戳 URL
+  _showQRModal(img.src);
 }
 // ===== XHR 下载原始图片数据（绕过一切浏览器缓存） =====
 function _fetchAsBlob(src, callback) {
@@ -1558,51 +1565,27 @@ function _fetchAsBlob(src, callback) {
   xhr.onerror = function() { callback(null); };
   xhr.send();
 }
-// ===== 从 Blob 解码二维码 =====
-function _decodeBlob(blob, callback) {
-  var fresh = new Image();
-  fresh.onload = function() {
-    callback(decodeQRFromImg(fresh));
-    URL.revokeObjectURL(fresh.src);
-  };
-  fresh.onerror = function() { callback(null); };
-  fresh.src = URL.createObjectURL(blob);
-}
-// ===== 弹窗展示（Blob URL 显示，保证每次都是新鲜图片） =====
-function _showQRWithFreshImage(srcOrBlob) {
+// ===== 展示弹窗：全新 img + HTTP 时间戳 =====
+function _showQRModal(httpSrc) {
   var overlay = document.getElementById('qrModalOverlay');
-  var modalImg = document.getElementById('qrModalImage');
-  if (!modalImg || !overlay) return;
-  // 清除上一次的 blob URL
-  if (modalImg.src && modalImg.src.indexOf('blob:') === 0) {
-    URL.revokeObjectURL(modalImg.src);
-    modalImg.src = '';
-  }
-  if (typeof srcOrBlob === 'string') {
-    // XHR 失败时的兜底（用原始 src，加时间戳）
-    modalImg.onload = function() {
-      overlay.style.display = 'flex';
-      tryDecodeQR(modalImg);
-      modalImg.onload = null;
-    };
-    modalImg.src = srcOrBlob + (srcOrBlob.indexOf('?') > -1 ? '&' : '?') + '_t=' + Date.now();
-  } else if (srcOrBlob) {
-    // Blob → Blob URL（每次都是全新下载的图片数据，不受任何缓存影响）
-    modalImg.src = URL.createObjectURL(srcOrBlob);
-    overlay.style.display = 'flex';
-    setTimeout(function(){ tryDecodeQR(modalImg); }, 300);
-  } else {
-    overlay.style.display = 'flex';
-  }
+  if (!overlay) return;
+  var wrapper = overlay.querySelector('[style*="overflow:hidden"]');
+  if (!wrapper) return;
+  var old = document.getElementById('qrModalImage');
+  if (old) old.remove();
+  var fi = document.createElement('img');
+  fi.id = 'qrModalImage';
+  fi.alt = '二维码';
+  fi.style.cssText = 'display:block;width:100%;height:auto;max-height:90vh';
+  fi.src = httpSrc + (httpSrc.indexOf('?') > -1 ? '&' : '?') + '_t=' + Date.now();
+  wrapper.appendChild(fi);
+  overlay.style.display = 'flex';
+  fi.onload = function() { tryDecodeQR(fi); fi.onload = null; fi.onerror = null; };
+  fi.onerror = function() { fi.onerror = null; };
 }
 function closeQRModal() {
   var o = document.getElementById('qrModalOverlay');
   if (o) o.style.display = 'none';
-  var m = document.getElementById('qrModalImage');
-  if (m) {
-    if (m.src.indexOf('blob:') === 0) URL.revokeObjectURL(m.src);
-    m.src = '';  // 清空 src，下次打开强制重新加载
-  }
 }
 // ===== 弹窗内二次解码兜底 =====
 function tryDecodeQR(imgEl) {
