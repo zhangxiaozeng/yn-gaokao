@@ -16,19 +16,13 @@
     url = (url + sep + '_t=' + Date.now()).replace(hash, '') + hash;
     window.location.replace(url);
   }
-  // ===== 微信 bfcache 快照恢复：强制刷新页面（微信长按识别需要图片真正重新加载） =====
+  // ===== 阻止微信 bfcache：长按识别二维码需要图片有真实像素数据 =====
+  window.addEventListener('unload', function(){});  // 告诉浏览器"有清理工作"，禁止存入 bfcache
   window.addEventListener('pageshow', function(ev) {
-    if (ev.persisted) {
-      var cur = window.location.href;
-      var sep = cur.indexOf('?') > -1 ? '&' : '?';
-      var hash = window.location.hash;
-      cur = cur.replace(/[?&]_t=[^&]*/g, '');
-      cur = (cur + sep + '_t=' + Date.now()).replace(hash, '') + hash;
-      window.location.replace(cur);
-    }
+    if (ev.persisted) location.reload();
   });
 })();
-var BUILD_ID = '17';
+var BUILD_ID = '18';
 </script>
 <title>云南高考家长群 · 已有数千位家长加入</title>
 <meta name="description" content="云南高考志愿填报指导，覆盖昆明、曲靖、大理、玉溪等16个地州。加入当地家长交流群，获取最新高考政策解读和志愿填报技巧。">
