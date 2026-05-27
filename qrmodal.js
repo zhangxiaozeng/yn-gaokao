@@ -34,12 +34,12 @@
         '<div style="width:100%;background:#fff;border-radius:12px;overflow:hidden;display:flex;align-items:center;justify-content:center">' +
           '<img id="qrModalImage" src="" alt="二维码" style="display:block;width:100%;height:auto;max-height:90vh">' +
         '</div>' +
-        '<div id="qrDirectAction" style="display:none;margin-top:12px;text-align:center">' +
-          '<button onclick="var u=document.getElementById(\'qrDirectLink\').href;if(u&&u!=\'#\')location.href=u" style="display:block;width:100%;padding:12px;background:#07c160;color:#fff;border-radius:10px;font-size:15px;font-weight:600;border:none;cursor:pointer;box-sizing:border-box">' +
-            '<i class="fab fa-weixin"></i> 直接加入群聊' +
+        '<div id="qrDirectAction" style="display:none;margin-top:12px">' +
+          '<button onclick="var u=document.getElementById(\'qrDirectLink\').href;if(u&&u!=\'#\')location.replace(u)" style="display:block;width:100%;padding:22px 12px;background:#07c160;color:#fff;border-radius:12px;font-size:18px;font-weight:700;border:none;cursor:pointer;box-sizing:border-box">' +
+            '<i class="fab fa-weixin" style="font-size:22px;margin-right:8px"></i> 加入群聊' +
           '</button>' +
           '<a id="qrDirectLink" href="#" style="display:none"></a>' +
-          '<p style="text-align:center;font-size:12px;color:#9ca3af;margin-top:6px">识别到企业微信群，点击一键直达</p>' +
+          '<p style="text-align:center;font-size:13px;color:#9ca3af;margin-top:10px">已自动识别企业微信群，点击一键加入</p>' +
         '</div>' +
         '<p style="text-align:center;font-size:15px;color:#4b5563;margin-top:12px;font-weight:500">长按或截图保存二维码</p>' +
         '<p style="text-align:center;font-size:13px;color:#9ca3af;margin-top:4px">打开微信扫一扫识别</p>' +
@@ -79,7 +79,7 @@
     modalImg.src = img.src;
   };
 
-  // ===== 二维码解码：提取图片中的链接，显示"直接加入群聊"按钮 =====
+  // ===== 二维码解码：提取图片中的链接，隐藏二维码，显示大号"直接加入群聊"按钮 =====
   function tryDecodeQR(imgEl) {
     var action = document.getElementById('qrDirectAction');
     var link = document.getElementById('qrDirectLink');
@@ -98,6 +98,8 @@
       var code = jsQR(d.data, d.width, d.height);
       if (code && code.data && code.data.indexOf('http') === 0) {
         link.href = code.data;
+        // 有链接 → 隐藏二维码，显示大按钮
+        document.getElementById('qrModalImage').style.display = 'none';
         action.style.display = 'block';
       }
     } catch(e) { /* CORS 或不支持时静默失败 */ }
