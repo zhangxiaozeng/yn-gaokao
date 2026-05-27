@@ -23,7 +23,7 @@
     if (ev.persisted) location.reload();
   });
 })();
-var BUILD_ID = '23';
+var BUILD_ID = '24';
 </script>
 <title>云南高考家长群 · 已有数千位家长加入</title>
 <meta name="description" content="云南高考志愿填报指导，覆盖昆明、曲靖、大理、玉溪等16个地州。加入当地家长交流群，获取最新高考政策解读和志愿填报技巧。">
@@ -1019,23 +1019,29 @@ function selectCounty(cityId, btn) {
   // 更新提示文字
   document.getElementById('county-label').textContent = countyName + '家长群';
   document.getElementById('county-hint').textContent = '扫码加微信 · 备注"' + cityId + '-' + countyName + '"即可进群';
-  // 加载区县二维码，降级链：区县码 → 地州码 → 主码
-  // 注意：仅在数据加载成功后才更新图片，避免清空已有二维码
+  // 加载区县二维码，降级链：区县码 → 地州码
   var img = document.getElementById('qrcode-city-' + cityId);
   if (img) {
-    var oldSrc = img.src;
-    // 先显示加载状态（保留旧图不闪白）
     CloudStorage.getCountyQR(cityId, countyName).then(function(qr) {
       if (qr) {
         img.src = qr;
+        // 区县码加载失败 → 降级到地州码
+        var _qr = qr;
+        img.onerror = function() {
+          img.onerror = null;
+          CloudStorage.getCityQR(cityId).then(function(cityQr) {
+            if (cityQr && cityQr !== _qr) img.src = cityQr;
+          });
+        };
       } else {
-        // 降级到地州码
         CloudStorage.getCityQR(cityId).then(function(cityQr) {
           if (cityQr) img.src = cityQr;
         });
       }
     }).catch(function() {
-      // 网络失败时不改变已有图片
+      CloudStorage.getCityQR(cityId).then(function(cityQr) {
+        if (cityQr) img.src = cityQr;
+      });
     });
   }
 }
@@ -1522,71 +1528,42 @@ function decodeQRFromImg(imgEl) {
   } catch(e) {}
   return null;
 }
-// ===== 点击查看大图：保存 → 刷新页面 → 自动弹窗 =====
+// ===== 二维码弹窗：直接弹窗 + 新图片绕过微信 bfcache =====
 function showQRModal(imgId) {
-  var img = document.getElementById(imgId);
-  if (!img || !img.src) return;
-  try {
-    sessionStorage.setItem('_Q', JSON.stringify({ src: img.src, at: Date.now() }));
-  } catch(e) {}
-  // 刷新页面，让一切重新加载（和第一次进入完全一样）
-  var c = window.location.href.replace(/[?&]_t=[^&]*/g, '');
-  window.location.href = c + (c.indexOf('?') > -1 ? '&' : '?') + '_t=' + Date.now();
-}
-// ===== 页面加载后检查是否有待处理的二维码（刷新回来的） =====
-function checkPendingQR() {
-  try {
-    var raw = sessionStorage.getItem('_Q');
-    if (!raw) return;
-    sessionStorage.removeItem('_Q');
-    var d = JSON.parse(raw);
-    if (!d || !d.src || Date.now() - d.at > 10000) return;
-    // XHR 重新下载 → data URL → 弹窗
-    var sep = d.src.indexOf('?') > -1 ? '&' : '?';
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', d.src + sep + '_t=' + Date.now(), true);
-    xhr.responseType = 'blob';
-    xhr.onload = function() {
-      if (xhr.status !== 200) return;
-      // jsQR 自动解码
-      (function(blob) {
-        var fi = new Image();
-        fi.onload = function() {
-          var url = decodeQRFromImg(fi);
-          URL.revokeObjectURL(fi.src);
-          if (url) { navigateToQR(url); return; }
-        };
-        fi.onerror = function() {};
-        fi.src = URL.createObjectURL(blob);
-      })(xhr.response);
-      // data URL 弹窗（像素在 JS 内存中，不依赖任何缓存）
-      var rd = new FileReader();
-      rd.onload = function() {
-        var overlay = document.getElementById('qrModalOverlay');
-        if (!overlay) return;
-        var wrapper = overlay.querySelector('[style*="overflow:hidden"]');
-        if (!wrapper) return;
-        var old = document.getElementById('qrModalImage');
-        if (old) old.remove();
-        var fi = document.createElement('img');
-        fi.id = 'qrModalImage';
-        fi.alt = '二维码';
-        fi.style.cssText = 'display:block;width:100%;height:auto;max-height:90vh';
-        fi.src = rd.result;
-        wrapper.appendChild(fi);
-        overlay.style.display = 'flex';
-        fi.onload = function() { tryDecodeQR(fi); fi.onload = null; fi.onerror = null; };
-      };
-      rd.readAsDataURL(xhr.response);
-    };
-    xhr.send();
-  } catch(e) {}
+  var overlay = document.getElementById('qrModalOverlay');
+  var modalImg = document.getElementById('qrModalImage');
+  var actionDiv = document.getElementById('qrDirectAction');
+  var directLink = document.getElementById('qrDirectLink');
+  if (!overlay || !modalImg) return;
+
+  var originalImg = document.getElementById(imgId);
+  var src = originalImg ? originalImg.src : '';
+  if (!src || src === '二维码.jpg' || src === '' || (originalImg && !originalImg.complete)) return;
+
+  // 重置状态
+  actionDiv.style.display = 'none';
+  directLink.href = '#';
+  modalImg.src = '';
+  modalImg.onload = null;
+  modalImg.onerror = null;
+
+  // 直接弹窗，用缓存破坏 URL 强制 HTTP 请求（绕过微信 bfcache）
+  var sep = src.indexOf('?') > -1 ? '&' : '?';
+  modalImg.src = src + sep + '_t=' + Date.now();
+  overlay.style.display = 'flex';
+
+  // 图片加载后自动尝试 jsQR 解码
+  modalImg.onload = function() {
+    modalImg.onload = null;
+    modalImg.onerror = null;
+    setTimeout(function() { tryDecodeQR(modalImg); }, 100);
+  };
 }
 function closeQRModal() {
   var o = document.getElementById('qrModalOverlay');
   if (o) o.style.display = 'none';
 }
-// ===== 弹窗内二次解码兜底 =====
+// ===== 弹窗内 jsQR 解码：成功则显示"直接加入群聊"按钮 =====
 function tryDecodeQR(imgEl) {
   if (typeof jsQR !== 'function' || !imgEl || !imgEl.naturalWidth || !imgEl.naturalHeight) return;
   var c = document.createElement('canvas');
@@ -1599,7 +1576,13 @@ function tryDecodeQR(imgEl) {
     var d = ctx.getImageData(0, 0, c.width, c.height);
     var code = jsQR(d.data, d.width, d.height);
     if (code && code.data && code.data.indexOf('http') === 0) {
-      navigateToQR(code.data);
+      // 显示"直接加入群聊"按钮，不自动跳转（避免微信 bfcache 问题）
+      var link = document.getElementById('qrDirectLink');
+      var actionDiv = document.getElementById('qrDirectAction');
+      if (link && actionDiv) {
+        link.href = code.data;
+        actionDiv.style.display = 'block';
+      }
     }
   } catch(e) {}
 }
@@ -1620,7 +1603,6 @@ document.addEventListener('DOMContentLoaded', () => {
   loadQRCode();
   startParentCounter();
   initCityQRs();
-  setTimeout(checkPendingQR, 500);  // 自动弹窗（刷新回来的），等页面渲染完
 });
 </script>
 </body>
