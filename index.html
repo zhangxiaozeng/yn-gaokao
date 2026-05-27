@@ -23,7 +23,7 @@
     if (ev.persisted) location.reload();
   });
 })();
-var BUILD_ID = '22';
+var BUILD_ID = '23';
 </script>
 <title>云南高考家长群 · 已有数千位家长加入</title>
 <meta name="description" content="云南高考志愿填报指导，覆盖昆明、曲靖、大理、玉溪等16个地州。加入当地家长交流群，获取最新高考政策解读和志愿填报技巧。">
@@ -1522,48 +1522,65 @@ function decodeQRFromImg(imgEl) {
   } catch(e) {}
   return null;
 }
-// ===== 主入口：点击查看大图（XHR 下载 → data URL → 新 img） =====
+// ===== 点击查看大图：保存 → 刷新页面 → 自动弹窗 =====
 function showQRModal(imgId) {
   var img = document.getElementById(imgId);
   if (!img || !img.src) return;
-  var src = img.src;
-  // XHR 下载原始图片数据
-  var xhr = new XMLHttpRequest();
-  xhr.open('GET', src + (src.indexOf('?') > -1 ? '&' : '?') + '_t=' + Date.now(), true);
-  xhr.responseType = 'blob';
-  xhr.onload = function() {
-    if (xhr.status !== 200) return;
-    // 尝试 jsQR 解码
-    var fresh = new Image();
-    fresh.onload = function() {
-      var url = decodeQRFromImg(fresh);
-      URL.revokeObjectURL(fresh.src);
-      if (url) { navigateToQR(url); return; }
+  try {
+    sessionStorage.setItem('_Q', JSON.stringify({ src: img.src, at: Date.now() }));
+  } catch(e) {}
+  // 刷新页面，让一切重新加载（和第一次进入完全一样）
+  var c = window.location.href.replace(/[?&]_t=[^&]*/g, '');
+  window.location.href = c + (c.indexOf('?') > -1 ? '&' : '?') + '_t=' + Date.now();
+}
+// ===== 页面加载后检查是否有待处理的二维码（刷新回来的） =====
+function checkPendingQR() {
+  try {
+    var raw = sessionStorage.getItem('_Q');
+    if (!raw) return;
+    sessionStorage.removeItem('_Q');
+    var d = JSON.parse(raw);
+    if (!d || !d.src || Date.now() - d.at > 10000) return;
+    // XHR 重新下载 → data URL → 弹窗
+    var sep = d.src.indexOf('?') > -1 ? '&' : '?';
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', d.src + sep + '_t=' + Date.now(), true);
+    xhr.responseType = 'blob';
+    xhr.onload = function() {
+      if (xhr.status !== 200) return;
+      // jsQR 自动解码
+      (function(blob) {
+        var fi = new Image();
+        fi.onload = function() {
+          var url = decodeQRFromImg(fi);
+          URL.revokeObjectURL(fi.src);
+          if (url) { navigateToQR(url); return; }
+        };
+        fi.onerror = function() {};
+        fi.src = URL.createObjectURL(blob);
+      })(xhr.response);
+      // data URL 弹窗（像素在 JS 内存中，不依赖任何缓存）
+      var rd = new FileReader();
+      rd.onload = function() {
+        var overlay = document.getElementById('qrModalOverlay');
+        if (!overlay) return;
+        var wrapper = overlay.querySelector('[style*="overflow:hidden"]');
+        if (!wrapper) return;
+        var old = document.getElementById('qrModalImage');
+        if (old) old.remove();
+        var fi = document.createElement('img');
+        fi.id = 'qrModalImage';
+        fi.alt = '二维码';
+        fi.style.cssText = 'display:block;width:100%;height:auto;max-height:90vh';
+        fi.src = rd.result;
+        wrapper.appendChild(fi);
+        overlay.style.display = 'flex';
+        fi.onload = function() { tryDecodeQR(fi); fi.onload = null; fi.onerror = null; };
+      };
+      rd.readAsDataURL(xhr.response);
     };
-    fresh.onerror = function() {};
-    fresh.src = URL.createObjectURL(xhr.response);
-    // 转 data URL 展示弹窗（像素在内存中，不依赖浏览器缓存/bfcache）
-    var reader = new FileReader();
-    reader.onload = function() {
-      var overlay = document.getElementById('qrModalOverlay');
-      if (!overlay) return;
-      var wrapper = overlay.querySelector('[style*="overflow:hidden"]');
-      if (!wrapper) return;
-      var old = document.getElementById('qrModalImage');
-      if (old) old.remove();
-      var fi = document.createElement('img');
-      fi.id = 'qrModalImage';
-      fi.alt = '二维码';
-      fi.style.cssText = 'display:block;width:100%;height:auto;max-height:90vh';
-      // data URL：像素数据在内存中，微信一定能读到
-      fi.src = reader.result;
-      wrapper.appendChild(fi);
-      overlay.style.display = 'flex';
-      fi.onload = function() { tryDecodeQR(fi); fi.onload = null; fi.onerror = null; };
-    };
-    reader.readAsDataURL(xhr.response);
-  };
-  xhr.send();
+    xhr.send();
+  } catch(e) {}
 }
 function closeQRModal() {
   var o = document.getElementById('qrModalOverlay');
@@ -1603,6 +1620,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadQRCode();
   startParentCounter();
   initCityQRs();
+  setTimeout(checkPendingQR, 500);  // 自动弹窗（刷新回来的），等页面渲染完
 });
 </script>
 </body>
