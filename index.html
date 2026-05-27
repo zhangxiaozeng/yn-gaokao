@@ -9,7 +9,7 @@
 <script>
 // ===== 微信浏览器缓存强制刷新（必须放在最前面） =====
 (function(){
-  var V = '14';
+  var V = '15';
   if (window.location.href.indexOf('__v=' + V) === -1) {
     var url = window.location.href.replace(/[?&]__v=\d*/g, '');
     var sep = url.indexOf('?') > -1 ? '&' : '?';
@@ -19,16 +19,16 @@
   }
 })();
 // 版本号，用于静态资源缓存控制
-var BUILD_ID = '14';
+var BUILD_ID = '15';
 </script>
 <title>云南高考家长群 · 已有数千位家长加入</title>
 <meta name="description" content="云南高考志愿填报指导，覆盖昆明、曲靖、大理、玉溪等16个地州。加入当地家长交流群，获取最新高考政策解读和志愿填报技巧。">
 <meta name="keywords" content="云南高考志愿填报,高考志愿指导,云南家长群,高考咨询">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
-<script src="https://cdn.tailwindcss.com?ver=14"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css?ver=14">
-<script src="owner-config.js?ver=14"></script>
-<script src="cloud-config.js?ver=14"></script>
+<script src="https://cdn.tailwindcss.com?ver=15"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css?ver=15">
+<script src="owner-config.js?ver=15"></script>
+<script src="cloud-config.js?ver=15"></script>
 <script>
 tailwind.config = {
   theme: {
@@ -694,14 +694,16 @@ details.benefit-card summary { list-style:none; }
 </div> <!-- /landingMode -->
 
 <!-- ========== 二维码弹窗 ========== -->
-<div id="qrModalOverlay" class="fixed inset-0 z-[200] bg-black/60 hidden items-center justify-center" onclick="closeQRModal()">
-  <div class="bg-white rounded-2xl p-6 w-72 shadow-2xl" onclick="event.stopPropagation()">
-    <div class="w-56 h-56 mx-auto rounded-xl overflow-hidden border border-gray-200 shadow-sm">
-      <img id="qrModalImage" src="" alt="二维码" class="w-full h-full object-cover">
+<div id="qrModalOverlay" class="fixed inset-0 z-[200] bg-black/80 hidden items-center justify-center px-5" onclick="closeQRModal()">
+  <div class="bg-white rounded-2xl overflow-hidden shadow-2xl w-full max-w-xs" onclick="event.stopPropagation()">
+    <div class="p-4">
+      <div class="w-full overflow-hidden rounded-xl bg-white flex items-center justify-center">
+        <img id="qrModalImage" src="" alt="二维码" class="w-full h-auto" style="display:block;max-height:70vh">
+      </div>
+      <p class="text-center text-sm text-gray-600 mt-4 font-medium">长按或截图保存二维码</p>
+      <p class="text-center text-xs text-gray-400 mt-1">打开微信扫一扫识别</p>
     </div>
-    <p class="text-center text-sm text-gray-600 mt-4 font-medium">长按或截图保存二维码</p>
-    <p class="text-center text-xs text-gray-400 mt-1">打开微信扫一扫识别</p>
-    <button onclick="closeQRModal()" class="block w-full mt-4 py-2.5 bg-gray-100 text-gray-600 rounded-xl text-sm font-medium hover:bg-gray-200 transition-colors">关 闭</button>
+    <button onclick="closeQRModal()" class="w-full py-3 text-gray-500 text-sm font-medium border-t border-gray-100 hover:bg-gray-50 transition-colors text-center">关 闭</button>
   </div>
 </div>
 
