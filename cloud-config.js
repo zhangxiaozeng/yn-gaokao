@@ -34,8 +34,10 @@ var CloudStorage = (function() {
     if (window.__QR_DATA__) {
       var data = window.__QR_DATA__;
       // 本地缓存比 script 更新的情况（用户刚上传 GitHub 同步未完成）
-      if (localData && localData._updated > (data._updated || 0)) {
-        data = localData;
+      if (localData) {
+        var localNewer = localData._updated && localData._updated > (data._updated || 0);
+        var bothNoTs = !localData._updated && !data._updated;
+        if (localNewer || bothNoTs) data = localData;
       }
       // 同步到本地缓存以便下次快速读取
       try { localStorage.setItem(CITY_KEY, JSON.stringify(data)); } catch(e) {}
