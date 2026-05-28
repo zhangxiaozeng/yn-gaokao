@@ -7,12 +7,6 @@
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script>
-// ===== 检测是否在 v2 版本，否则跳转 =====
-if (location.pathname.indexOf("v2/") === -1) {
-  var p = location.pathname.replace(//?$/, "/v2/") + location.search + location.hash;
-  location.replace(p);
-  return;
-}
 // ===== 微信缓存穿透 =====
 (function(){
   var base = location.href.split('?')[0].split('#')[0];
