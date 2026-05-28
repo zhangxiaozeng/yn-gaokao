@@ -12,8 +12,9 @@
 html,body{width:100%;height:100%;background:#000;display:flex;align-items:center;justify-content:center}
 img{display:block;max-width:100%}
 </style>
+<script src="jsqr.min.js"></script>
 <script>
-// ===== 唯一目的：禁用 bfcache，确保每次都能长安识别二维码 =====
+// ===== 禁用 bfcache =====
 window.onunload = function(){};
 window.onbeforeunload = function(){};
 window.addEventListener('pageshow', function(ev){
@@ -24,8 +25,43 @@ document.addEventListener('DOMContentLoaded', function(){
   var imgUrl = new URLSearchParams(location.search).get('img');
   if (!imgUrl) return;
   var sep = imgUrl.indexOf('?') > -1 ? '&' : '?';
+  var cbUrl = imgUrl + sep + '_t=' + Date.now();
   var img = document.getElementById('qr-img');
-  img.src = imgUrl + sep + '_t=' + Date.now();
+
+  // 方案A：显示原图，用户可手动长安识别（兜底）
+  img.src = cbUrl;
+
+  // 方案B：本地 jsQR 解码
+  // 用 XHR 下载图片 → 转 dataURL → canvas 提取像素 → jsQR 解码 → 直跳
+  if (typeof jsQR !== 'function') return;
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', cbUrl, true);
+  xhr.responseType = 'blob';
+  xhr.onload = function() {
+    if (xhr.status !== 200) return;
+    var fr = new FileReader();
+    fr.onload = function(e) {
+      var tmp = new Image();
+      tmp.onload = function() {
+        try {
+          var c = document.createElement('canvas');
+          c.width = tmp.width;
+          c.height = tmp.height;
+          var ctx = c.getContext('2d');
+          ctx.drawImage(tmp, 0, 0);
+          var px = ctx.getImageData(0, 0, c.width, c.height);
+          var code = jsQR(px.data, px.width, px.height);
+          if (code && code.data && code.data.indexOf('http') === 0) {
+            location.replace(code.data);
+          }
+        } catch(e) {}
+      };
+      tmp.src = fr.result;
+    };
+    fr.readAsDataURL(xhr.response);
+  };
+  xhr.onerror = function(){};
+  xhr.send();
 });
 </script>
 </head>
