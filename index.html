@@ -23,7 +23,7 @@
     if (ev.persisted) location.reload();
   });
 })();
-var BUILD_ID = '27';
+var BUILD_ID = '28';
 </script>
 <title>云南高考家长群 · 已有数千位家长加入</title>
 <meta name="description" content="云南高考志愿填报指导，覆盖昆明、曲靖、大理、玉溪等16个地州。加入当地家长交流群，获取最新高考政策解读和志愿填报技巧。">
@@ -697,25 +697,10 @@ details.benefit-card summary { list-style:none; }
 
 </div> <!-- /landingMode -->
 
-<!-- ========== 二维码弹窗（内联style，缓存不影响） ========== -->
-<div id="qrModalOverlay" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.85);-webkit-backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:16px" onclick="closeQRModal()">
-  <div style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 25px 60px rgba(0,0,0,0.4);width:100%;max-width:340px" onclick="event.stopPropagation()">
-    <div style="padding:16px">
-      <div style="width:100%;background:#fff;border-radius:12px;overflow:hidden;display:flex;align-items:center;justify-content:center">
-        <img id="qrModalImage" src="" alt="二维码" style="display:block;width:100%;height:auto;max-height:90vh">
-      </div>
-      <div id="qrDirectAction" style="display:none;margin-top:12px;text-align:center">
-        <button onclick="var u=document.getElementById('qrDirectLink').href;if(u&&u!='#')location.replace(u)" style="display:block;width:100%;padding:22px 12px;background:#07c160;color:#fff;border-radius:12px;font-size:18px;font-weight:700;border:none;cursor:pointer;box-sizing:border-box">
-          <i class="fab fa-weixin"></i> 直接加入群聊
-        </button>
-        <a id="qrDirectLink" href="#" style="display:none"></a>
-        <p style="text-align:center;font-size:12px;color:#9ca3af;margin-top:6px">识别到企业微信群，点击一键直达</p>
-      </div>
-      <p style="text-align:center;font-size:15px;color:#4b5563;margin-top:12px;font-weight:500">长按或截图保存二维码</p>
-      <p style="text-align:center;font-size:13px;color:#9ca3af;margin-top:4px">打开微信扫一扫识别</p>
-    </div>
-    <button onclick="closeQRModal()" style="display:block;width:100%;padding:14px;color:#6b7280;font-size:14px;background:transparent;border:none;cursor:pointer;border-top:1px solid #f3f4f6">关 闭</button>
-  </div>
+<!-- ========== 二维码全屏弹窗（不跳转页面，bfcache 不影响） ========== -->
+<div id="qrModalOverlay" style="display:none;position:fixed;inset:0;z-index:99999;background:#000;align-items:center;justify-content:center" onclick="closeQRModal()">
+  <img id="qrModalImage" src="" alt="二维码" style="display:block;width:100%;height:100%;object-fit:contain" onclick="event.stopPropagation()">
+  <div style="position:fixed;top:20px;right:20px;z-index:100000;width:40px;height:40px;background:rgba(255,255,255,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:22px;color:#fff;font-weight:300;line-height:1;user-select:none;-webkit-user-select:none" onclick="closeQRModal()">✕</div>
 </div>
 
 <script>
@@ -1528,12 +1513,14 @@ function decodeQRFromImg(imgEl) {
   } catch(e) {}
   return null;
 }
-// ===== 点击查看大图：跳转到独立HTML页面（彻底禁用bfcache，长安识别二维码每次有效） =====
+// ===== 点击查看大图：全屏弹窗展示（不跳转页面，bfcache不影响，长安每次有效） =====
 function showQRModal(imgId) {
   var img = document.getElementById(imgId);
   if (!img || !img.src || img.src === '二维码.jpg') return;
-  var viewerUrl = 'qr-viewer.html?img=' + encodeURIComponent(img.src) + '&_t=' + Date.now();
-  location.href = viewerUrl;
+  var modalImg = document.getElementById('qrModalImage');
+  var sep = img.src.indexOf('?') > -1 ? '&' : '?';
+  modalImg.src = img.src + sep + '_t=' + Date.now() + '_r=' + Math.random();
+  document.getElementById('qrModalOverlay').style.display = 'flex';
 }
 function closeQRModal() {
   var o = document.getElementById('qrModalOverlay');
