@@ -13,6 +13,11 @@ var CloudStorage = (function() {
 
   function _loadQRScript() {
     if (_qrDataPromise) return _qrDataPromise;
+    // 如果页面已内联数据（index.html 中 window.__QR_DATA__），直接返回
+    if (window.__QR_DATA__) {
+      _qrDataPromise = Promise.resolve();
+      return _qrDataPromise;
+    }
     _qrDataPromise = new Promise(function(resolve) {
       var s = document.createElement('script');
       s.src = 'city-qr-data.js?_t=' + Date.now() + '_' + Math.random();
