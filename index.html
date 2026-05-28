@@ -23,7 +23,7 @@
     if (ev.persisted) location.reload();
   });
 })();
-var BUILD_ID = '28';
+var BUILD_ID = '29';
 </script>
 <title>云南高考家长群 · 已有数千位家长加入</title>
 <meta name="description" content="云南高考志愿填报指导，覆盖昆明、曲靖、大理、玉溪等16个地州。加入当地家长交流群，获取最新高考政策解读和志愿填报技巧。">
@@ -701,6 +701,7 @@ details.benefit-card summary { list-style:none; }
 <div id="qrModalOverlay" style="display:none;position:fixed;inset:0;z-index:99999;background:#000;align-items:center;justify-content:center" onclick="closeQRModal()">
   <img id="qrModalImage" src="" alt="二维码" style="display:block;width:100%;height:100%;object-fit:contain" onclick="event.stopPropagation()">
   <div style="position:fixed;top:20px;right:20px;z-index:100000;width:40px;height:40px;background:rgba(255,255,255,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:22px;color:#fff;font-weight:300;line-height:1;user-select:none;-webkit-user-select:none" onclick="closeQRModal()">✕</div>
+  <p style="position:fixed;bottom:40px;left:0;right:0;text-align:center;color:rgba(255,255,255,0.5);font-size:14px;letter-spacing:1px;user-select:none">打开微信扫一扫 · 加入家长群</p>
 </div>
 
 <script>
@@ -1513,10 +1514,19 @@ function decodeQRFromImg(imgEl) {
   } catch(e) {}
   return null;
 }
-// ===== 点击查看大图：跳转独立页面。bfcache 在 qr-viewer.html 内部处理 =====
+// ===== 点击查看大图：微信→跳转独立页面（长按识别+jsQR自动跳转）；非微信→弹窗展示二维码便于扫码 =====
 function showQRModal(imgId) {
   var img = document.getElementById(imgId);
   if (!img || !img.src || img.src === '二维码.jpg') return;
+  // 非微信环境（电脑浏览器等）：弹窗展示二维码，不跳转
+  if (navigator.userAgent.indexOf('MicroMessenger') === -1) {
+    var modalImg = document.getElementById('qrModalImage');
+    var sep = img.src.indexOf('?') > -1 ? '&' : '?';
+    modalImg.src = img.src + sep + '_t=' + Date.now() + '_r=' + Math.random();
+    document.getElementById('qrModalOverlay').style.display = 'flex';
+    return;
+  }
+  // 微信环境：跳转 qr-viewer.html（bfcache 预防 + jsQR 自动跳转）
   var viewerUrl = 'qr-viewer.html?img=' + encodeURIComponent(img.src) + '&_t=' + Date.now() + '_r=' + Math.random();
   location.href = viewerUrl;
 }
