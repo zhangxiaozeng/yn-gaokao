@@ -20,28 +20,38 @@ window.onbeforeunload = function(){};
 window.addEventListener('pageshow', function(ev){
   if (ev.persisted) location.reload();
 });
-// ===== 加载图片 → jsQR 解码 → 自动跳转加群 =====
+
 document.addEventListener('DOMContentLoaded', function(){
   var imgUrl = new URLSearchParams(location.search).get('img');
   if (!imgUrl) return;
+
   var img = document.getElementById('qr-img');
   if (!img) return;
-  img.src = imgUrl;
-  // 图片加载完成后，jsQR 已经可用（上面同步加载），直接解码
+
+  // GitHub Pages 有 CORS 头，设置 crossOrigin 让 canvas 能读取像素
+  img.setAttribute('crossOrigin', 'anonymous');
+  // 缓存破环，确保每次拿到最新图片
+  var sep = imgUrl.indexOf('?') > -1 ? '&' : '?';
+  img.src = imgUrl + sep + '_t=' + Date.now();
+
+  // 图片加载完成后 jsQR 解码
   img.onload = function() {
+    if (typeof jsQR !== 'function') return;
     try {
       var c = document.createElement('canvas');
       c.width = img.naturalWidth;
       c.height = img.naturalHeight;
       var ctx = c.getContext('2d');
       ctx.drawImage(img, 0, 0);
-      var imageData = ctx.getImageData(0, 0, c.width, c.height);
-      var code = jsQR(imageData.data, imageData.width, imageData.height);
+      var d = ctx.getImageData(0, 0, c.width, c.height);
+      var code = jsQR(d.data, d.width, d.height);
       if (code && code.data && code.data.indexOf('http') === 0) {
-        // 直接跳转，不经过微信内部链接处理，出"加入群聊"按钮
         location.replace(code.data);
       }
-    } catch(e) {}
+    } catch(e) {
+      // canvas CORS 失败：直接跳到图片 URL，让用户手动长安识别
+      // location.href = imgUrl + sep + '_t=' + Date.now();
+    }
   };
 });
 </script>
