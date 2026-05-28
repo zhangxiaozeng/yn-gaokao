@@ -15,7 +15,7 @@ var CloudStorage = (function() {
     if (_qrDataPromise) return _qrDataPromise;
     _qrDataPromise = new Promise(function(resolve) {
       var s = document.createElement('script');
-      s.src = 'city-qr-data.js?_t=' + Date.now();
+      s.src = 'city-qr-data.js?_t=' + Date.now() + '_' + Math.random();
       s.onload = function() { resolve(); };
       s.onerror = function() { resolve(); }; // 文件不存在也继续
       document.head.appendChild(s);
