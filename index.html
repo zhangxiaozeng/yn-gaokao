@@ -23,7 +23,7 @@
     if (ev.persisted) location.reload();
   });
 })();
-var BUILD_ID = '26';
+var BUILD_ID = '27';
 </script>
 <title>云南高考家长群 · 已有数千位家长加入</title>
 <meta name="description" content="云南高考志愿填报指导，覆盖昆明、曲靖、大理、玉溪等16个地州。加入当地家长交流群，获取最新高考政策解读和志愿填报技巧。">
@@ -1528,13 +1528,12 @@ function decodeQRFromImg(imgEl) {
   } catch(e) {}
   return null;
 }
-// ===== 点击查看大图：直接跳转到二维码图片（比弹窗更稳定，微信X5原生支持图片识别） =====
+// ===== 点击查看大图：跳转到独立HTML页面（彻底禁用bfcache，长安识别二维码每次有效） =====
 function showQRModal(imgId) {
   var img = document.getElementById(imgId);
   if (!img || !img.src || img.src === '二维码.jpg') return;
-  // 直接打开图片，微信X5浏览器对纯图片页面的二维码识别最可靠
-  var sep = img.src.indexOf('?') > -1 ? '&' : '?';
-  location.href = img.src + sep + '_t=' + Date.now();
+  var viewerUrl = 'qr-viewer.html?img=' + encodeURIComponent(img.src) + '&_t=' + Date.now();
+  location.href = viewerUrl;
 }
 function closeQRModal() {
   var o = document.getElementById('qrModalOverlay');
