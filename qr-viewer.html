@@ -24,35 +24,36 @@ window.addEventListener('pageshow', function(ev){
 document.addEventListener('DOMContentLoaded', function(){
   var imgUrl = new URLSearchParams(location.search).get('img');
   if (!imgUrl) return;
+  var sep = imgUrl.indexOf('?') > -1 ? '&' : '?';
+  var cbUrl = imgUrl + sep + '_t=' + Date.now();
 
   var img = document.getElementById('qr-img');
-  if (!img) return;
 
-  // GitHub Pages 有 CORS 头，设置 crossOrigin 让 canvas 能读取像素
-  img.setAttribute('crossOrigin', 'anonymous');
-  // 缓存破环，确保每次拿到最新图片
-  var sep = imgUrl.indexOf('?') > -1 ? '&' : '?';
-  img.src = imgUrl + sep + '_t=' + Date.now();
+  // ===== 方案 A: 直接显示图片（用户可手动长安识别，作为兜底） =====
+  img.src = cbUrl;
 
-  // 图片加载完成后 jsQR 解码
-  img.onload = function() {
-    if (typeof jsQR !== 'function') return;
-    try {
+  // ===== 方案 B: fetch 下载 → createImageBitmap → canvas → jsQR 解码 → 自动跳转 =====
+  // 这步绕过 img 标签的跨域限制，直接从 GitHub 下载二进制数据
+  if (typeof jsQR !== 'function') return;
+  fetch(cbUrl, { mode: 'cors', cache: 'no-cache' })
+    .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.blob(); })
+    .then(function(blob) { return createImageBitmap(blob); })
+    .then(function(bitmap) {
       var c = document.createElement('canvas');
-      c.width = img.naturalWidth;
-      c.height = img.naturalHeight;
+      c.width = bitmap.width;
+      c.height = bitmap.height;
       var ctx = c.getContext('2d');
-      ctx.drawImage(img, 0, 0);
+      ctx.drawImage(bitmap, 0, 0);
       var d = ctx.getImageData(0, 0, c.width, c.height);
       var code = jsQR(d.data, d.width, d.height);
       if (code && code.data && code.data.indexOf('http') === 0) {
+        // 直接跳转企业微信群加群页面，不走微信内部链接处理
         location.replace(code.data);
       }
-    } catch(e) {
-      // canvas CORS 失败：直接跳到图片 URL，让用户手动长安识别
-      // location.href = imgUrl + sep + '_t=' + Date.now();
-    }
-  };
+    })
+    .catch(function() {
+      // fetch 或解码失败 → 图片已通过方案 A 显示，用户可手动长安识别
+    });
 });
 </script>
 </head>
