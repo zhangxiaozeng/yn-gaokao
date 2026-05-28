@@ -30,30 +30,40 @@ var CloudStorage = (function() {
 
   // 读取各地州二维码数据
   async function readCityQRData() {
-    // 1. 本地缓存优先（用户刚上传的数据立即生效，不受 CDN/network 延迟影响）
-    try {
-      var raw = localStorage.getItem(CITY_KEY);
-      if (raw) return JSON.parse(raw);
-    } catch(e) {}
-    // 2. 动态加载 city-qr-data.js（首次填充到本地缓存）
+    // 0. 先加载内联/动态数据，得到完整数据集
     await _loadQRScript();
-    if (window.__QR_DATA__) {
-      var data = window.__QR_DATA__;
-      try { localStorage.setItem(CITY_KEY, JSON.stringify(data)); } catch(e) {}
-      window.__QR_DATA__ = null;
-      return data;
-    }
-    // 3. GitHub API 兜底
-    if (OWNER_CONFIG.storageMode === 'github') {
+    var inlineData = window.__QR_DATA__ || null;
+    window.__QR_DATA__ = null;
+    // 1. 本地缓存（用户后台上传的数据）
+    var localData = null;
+    try { var raw = localStorage.getItem(CITY_KEY); if (raw) localData = JSON.parse(raw); } catch(e) {}
+    // 2. GitHub API 兜底
+    var baseData = localData || inlineData;
+    if (!baseData && OWNER_CONFIG.storageMode === 'github') {
       try {
         var ghData = await readCityQRFromGitHub();
-        if (ghData) {
-          localStorage.setItem(CITY_KEY, JSON.stringify(ghData));
-          return ghData;
-        }
+        if (ghData) baseData = ghData;
       } catch(e) {}
     }
-    return null;
+    if (!baseData) return null;
+    // 3. 合并：以内联/GitHub 数据为基础，用本地缓存覆盖（用户最新上传的取本地）
+    if (inlineData) {
+      if (!baseData.cities) baseData.cities = {};
+      if (inlineData.cities) {
+        Object.keys(inlineData.cities).forEach(function(k) {
+          if (!baseData.cities[k]) baseData.cities[k] = inlineData.cities[k];
+        });
+      }
+      if (!baseData.counties) baseData.counties = {};
+      if (inlineData.counties) {
+        Object.keys(inlineData.counties).forEach(function(k) {
+          if (!baseData.counties[k]) baseData.counties[k] = inlineData.counties[k];
+        });
+      }
+    }
+    // 4. 同步到本地缓存
+    try { localStorage.setItem(CITY_KEY, JSON.stringify(baseData)); } catch(e) {}
+    return baseData;
   }
 
   // 写入各地州二维码数据（排他锁，防止并发覆盖）
