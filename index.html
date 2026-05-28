@@ -1513,14 +1513,12 @@ function decodeQRFromImg(imgEl) {
   } catch(e) {}
   return null;
 }
-// ===== 点击查看大图：全屏弹窗展示（不跳转页面，bfcache不影响，长安每次有效） =====
+// ===== 点击查看大图：跳转独立页面。bfcache 在 qr-viewer.html 内部处理 =====
 function showQRModal(imgId) {
   var img = document.getElementById(imgId);
   if (!img || !img.src || img.src === '二维码.jpg') return;
-  var modalImg = document.getElementById('qrModalImage');
-  var sep = img.src.indexOf('?') > -1 ? '&' : '?';
-  modalImg.src = img.src + sep + '_t=' + Date.now() + '_r=' + Math.random();
-  document.getElementById('qrModalOverlay').style.display = 'flex';
+  var viewerUrl = 'qr-viewer.html?img=' + encodeURIComponent(img.src) + '&_t=' + Date.now() + '_r=' + Math.random();
+  location.href = viewerUrl;
 }
 function closeQRModal() {
   var o = document.getElementById('qrModalOverlay');
