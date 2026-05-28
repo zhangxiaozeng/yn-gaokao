@@ -6,28 +6,47 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>二维码 - 长安识别加群</title>
+<title>二维码</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{width:100%;height:100%;background:#fff;display:flex;align-items:center;justify-content:center}
-img{display:block;max-width:100%;max-height:100vh;width:auto;height:auto}
+html,body{width:100%;height:100%;background:#000;display:flex;align-items:center;justify-content:center}
+img{display:block;max-width:100%}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <script>
-// ===== 彻底禁用微信 bfcache：每次进来都是新页面 =====
+// ===== 彻底禁用微信 bfcache =====
 window.onunload = function(){};
 window.onbeforeunload = function(){};
 window.addEventListener('pageshow', function(ev){
   if (ev.persisted) location.reload();
 });
-// ===== 加载二维码图片 =====
+// ===== 加载图片 → jsQR 解码 → 自动跳转加群 =====
 document.addEventListener('DOMContentLoaded', function(){
-  var p = new URLSearchParams(location.search);
-  var imgUrl = p.get('img');
-  if (imgUrl) document.getElementById('qr-img').src = imgUrl;
+  var imgUrl = new URLSearchParams(location.search).get('img');
+  if (!imgUrl) return;
+  var img = document.getElementById('qr-img');
+  if (!img) return;
+  img.src = imgUrl;
+  // 图片加载完成后，jsQR 已经可用（上面同步加载），直接解码
+  img.onload = function() {
+    try {
+      var c = document.createElement('canvas');
+      c.width = img.naturalWidth;
+      c.height = img.naturalHeight;
+      var ctx = c.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      var imageData = ctx.getImageData(0, 0, c.width, c.height);
+      var code = jsQR(imageData.data, imageData.width, imageData.height);
+      if (code && code.data && code.data.indexOf('http') === 0) {
+        // 直接跳转，不经过微信内部链接处理，出"加入群聊"按钮
+        location.replace(code.data);
+      }
+    } catch(e) {}
+  };
 });
 </script>
 </head>
 <body>
-<img id="qr-img" src="" alt="二维码 - 长安识别加群">
+<img id="qr-img" src="" alt="">
 </body>
 </html>
