@@ -14,51 +14,58 @@ img{display:block;max-width:100%}
 </style>
 <script src="jsqr.min.js"></script>
 <script>
-// ===== 禁用 bfcache =====
+// ===== 禁用 bfcache（X5 属性写法 + 事件写法双重保险） =====
 window.onunload = function(){};
 window.onbeforeunload = function(){};
-window.addEventListener('pageshow', function(ev){
-  if (ev.persisted) location.reload();
-});
+window.onpageshow = function(ev){ if (ev.persisted) location.reload(); };
+window.addEventListener('pageshow', function(ev){ if (ev.persisted) location.reload(); });
 
 document.addEventListener('DOMContentLoaded', function(){
   var imgUrl = new URLSearchParams(location.search).get('img');
   if (!imgUrl) return;
   var sep = imgUrl.indexOf('?') > -1 ? '&' : '?';
-  var cbUrl = imgUrl + sep + '_t=' + Date.now();
+  var cbUrl = imgUrl + sep + '_t=' + Date.now() + '_r=' + Math.random();
   var img = document.getElementById('qr-img');
+  var redirected = false;
 
-  // 方案A：显示原图，用户可手动长安识别（兜底）
+  // 显示原图（兜底，用户可手动长安识别）
   img.src = cbUrl;
 
-  // 方案B：本地 jsQR 解码
-  // 用 XHR 下载图片 → 转 dataURL → canvas 提取像素 → jsQR 解码 → 直跳
+  // jsQR 解码：XHR 下载 → FileReader → Image → canvas → jsQR → 直跳
   if (typeof jsQR !== 'function') return;
   var xhr = new XMLHttpRequest();
   xhr.open('GET', cbUrl, true);
   xhr.responseType = 'blob';
+  xhr.setRequestHeader('Cache-Control', 'no-cache, no-store');
+  xhr.setRequestHeader('Pragma', 'no-cache');
   xhr.onload = function() {
-    if (xhr.status !== 200) return;
-    var fr = new FileReader();
-    fr.onload = function(e) {
-      var tmp = new Image();
-      tmp.onload = function() {
-        try {
+    if (xhr.status !== 200 || redirected) return;
+    try {
+      var fr = new FileReader();
+      fr.onload = function(e) {
+        if (redirected) return;
+        var tmp = new Image();
+        tmp.onload = function() {
+          if (redirected) return;
           var c = document.createElement('canvas');
           c.width = tmp.width;
           c.height = tmp.height;
           var ctx = c.getContext('2d');
+          if (!ctx) return;
           ctx.drawImage(tmp, 0, 0);
           var px = ctx.getImageData(0, 0, c.width, c.height);
           var code = jsQR(px.data, px.width, px.height);
           if (code && code.data && code.data.indexOf('http') === 0) {
+            redirected = true;
             location.replace(code.data);
           }
-        } catch(e) {}
+        };
+        tmp.onerror = function(){};
+        tmp.src = fr.result;
       };
-      tmp.src = fr.result;
-    };
-    fr.readAsDataURL(xhr.response);
+      fr.onerror = function(){};
+      fr.readAsDataURL(xhr.response);
+    } catch(e) {}
   };
   xhr.onerror = function(){};
   xhr.send();
