@@ -107,8 +107,8 @@ var CloudStorage = (function() {
 
     // 主二维码
     if (result.main) result.main = await processVal('main', result.main);
-    if (result.main1) result.main1 = await processVal('main', result.main1);
-    if (result.main2) result.main2 = await processVal('main', result.main2);
+    if (result.main1) result.main1 = await processVal('main1', result.main1);
+    if (result.main2) result.main2 = await processVal('main2', result.main2);
 
     // 各地州
     if (result.cities) {
