@@ -23,7 +23,7 @@
     if (ev.persisted) location.reload();
   });
 })();
-var BUILD_ID = '25';
+var BUILD_ID = '26';
 </script>
 <title>云南高考家长群 · 已有数千位家长加入</title>
 <meta name="description" content="云南高考志愿填报指导，覆盖昆明、曲靖、大理、玉溪等16个地州。加入当地家长交流群，获取最新高考政策解读和志愿填报技巧。">
@@ -1528,33 +1528,13 @@ function decodeQRFromImg(imgEl) {
   } catch(e) {}
   return null;
 }
-// ===== 点击查看大图：保存 → 刷新页面 → 自动弹窗（绕过微信 bfcache） =====
+// ===== 点击查看大图：直接跳转到二维码图片（比弹窗更稳定，微信X5原生支持图片识别） =====
 function showQRModal(imgId) {
   var img = document.getElementById(imgId);
-  if (!img || !img.src) return;
-  try {
-    localStorage.setItem('_Q', JSON.stringify({ src: img.src, at: Date.now() }));
-  } catch(e) {}
-  // 强制刷新页面，相当于重新进入一次（用户要求的方案）
-  var c = window.location.href.replace(/[?&]_t=[^&]*/g, '').replace(/[?&]qr=[^&]*/g, '');
-  window.location.href = c + (c.indexOf('?') > -1 ? '&' : '?') + '_t=' + Date.now();
-}
-// ===== 页面加载后检查是否有待处理的二维码（刷新回来的） =====
-function checkPendingQR() {
-  try {
-    var raw = localStorage.getItem('_Q');
-    if (!raw) return;
-    localStorage.removeItem('_Q');
-    var d = JSON.parse(raw);
-    if (!d || !d.src || Date.now() - d.at > 10000) return;
-    var overlay = document.getElementById('qrModalOverlay');
-    var modalImg = document.getElementById('qrModalImage');
-    if (!overlay || !modalImg) return;
-    // 直接用 HTTP URL + 缓存破坏加载图片（不用 XHR/dataURL，那会搞砸）
-    var sep = d.src.indexOf('?') > -1 ? '&' : '?';
-    modalImg.src = d.src + sep + '_t=' + Date.now();
-    overlay.style.display = 'flex';
-  } catch(e) {}
+  if (!img || !img.src || img.src === '二维码.jpg') return;
+  // 直接打开图片，微信X5浏览器对纯图片页面的二维码识别最可靠
+  var sep = img.src.indexOf('?') > -1 ? '&' : '?';
+  location.href = img.src + sep + '_t=' + Date.now();
 }
 function closeQRModal() {
   var o = document.getElementById('qrModalOverlay');
@@ -1577,7 +1557,6 @@ document.addEventListener('DOMContentLoaded', () => {
   loadQRCode();
   startParentCounter();
   initCityQRs();
-  setTimeout(checkPendingQR, 500);
 });
 </script>
 </body>
