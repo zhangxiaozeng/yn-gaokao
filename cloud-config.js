@@ -56,24 +56,35 @@ var CloudStorage = (function() {
     return null;
   }
 
-  // 写入各地州二维码数据
+  // 写入各地州二维码数据（排他锁，防止并发覆盖）
+  var _writeLock = false;
+  var _writeQueue = [];
   async function writeCityQRData(data) {
-    if (!data) return { success: false, error: '无数据' };
-    data._updated = Date.now();
-    // 1. 先写本地（立即生效，不受网络影响）
-    localStorage.setItem(CITY_KEY, JSON.stringify(data));
-    // 2. 再同步 GitHub
-    if (OWNER_CONFIG.storageMode === 'github') {
-      // 2a. 上传所有 base64 图片为独立文件，替换为 URL
-      var processedData = await _convertDataURLsToFileURLs(data);
-      // 2b. 用处理后的数据（含 URL）写入 city-qr-data.json/.js
-      var result = await writeCityQRToGitHub(processedData);
-      if (!result.success) {
-        console.warn('GitHub 同步失败:', result.error);
-        return { success: true, syncError: result.error };
+    if (_writeLock) {
+      var self = this;
+      return new Promise(function(resolve) { _writeQueue.push(function() { resolve(self.writeCityQRData(data)); }); });
+    }
+    _writeLock = true;
+    try {
+      if (!data) return { success: false, error: '无数据' };
+      data._updated = Date.now();
+      localStorage.setItem(CITY_KEY, JSON.stringify(data));
+      if (OWNER_CONFIG.storageMode === 'github') {
+        var processedData = await _convertDataURLsToFileURLs(data);
+        var result = await writeCityQRToGitHub(processedData);
+        if (!result.success) {
+          console.warn('GitHub 同步失败:', result.error);
+          return { success: true, syncError: result.error };
+        }
+      }
+      return { success: true };
+    } finally {
+      _writeLock = false;
+      if (_writeQueue.length) {
+        var next = _writeQueue.shift();
+        setTimeout(next, 0);
       }
     }
-    return { success: true };
   }
 
   // 将数据中所有 base64 data URL 上传为图片文件，替换为相对 URL
