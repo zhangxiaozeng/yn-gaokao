@@ -7,13 +7,13 @@
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script>
-// ===== 微信缓存穿透：每次打开用 localStorage 计数器生成全新 URL =====
+// ===== 微信缓存穿透 =====
 (function(){
   var base = location.href.split('?')[0].split('#')[0];
-  var v = (parseInt(localStorage.getItem('pv') || '0') % 99999) + 1;
-  localStorage.setItem('pv', v);
-  if (location.href.indexOf('pv=' + v) === -1) {
-    location.replace(base + '?pv=' + v + '_' + Date.now());
+  if (location.href.indexOf('_t=') === -1) {
+    var v = (parseInt(localStorage.getItem('pv') || '0') % 99999) + 1;
+    localStorage.setItem('pv', v);
+    location.replace(base + '?_t=' + Date.now() + '_' + v);
   }
 })();
   // ===== 阻止微信 bfcache：长按识别二维码需要图片有真实像素数据 =====
