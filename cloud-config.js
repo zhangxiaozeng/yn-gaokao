@@ -25,37 +25,30 @@ var CloudStorage = (function() {
 
   // 读取各地州二维码数据
   async function readCityQRData() {
-    // 0. 同域动态加载 city-qr-data.js（微信可靠，不阻塞页面）
+    // 1. 本地缓存优先（用户刚上传的数据立即生效，不受 CDN/network 延迟影响）
+    try {
+      var raw = localStorage.getItem(CITY_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch(e) {}
+    // 2. 动态加载 city-qr-data.js（首次填充到本地缓存）
     await _loadQRScript();
-    // 1. 读本地缓存（用户刚上传未同步到 GitHub 的数据也能立即显示）
-    var localData = null;
-    try { var raw = localStorage.getItem(CITY_KEY); if (raw) localData = JSON.parse(raw); } catch(e) {}
-
     if (window.__QR_DATA__) {
       var data = window.__QR_DATA__;
-      // 本地缓存比 script 更新的情况（用户刚上传 GitHub 同步未完成）
-      if (localData) {
-        var localNewer = localData._updated && localData._updated > (data._updated || 0);
-        var bothNoTs = !localData._updated && !data._updated;
-        if (localNewer || bothNoTs) data = localData;
-      }
-      // 同步到本地缓存以便下次快速读取
       try { localStorage.setItem(CITY_KEY, JSON.stringify(data)); } catch(e) {}
       window.__QR_DATA__ = null;
       return data;
     }
-    // 2. 本地缓存兜底
-    if (localData) return localData;
-    // 3. 再尝试从 GitHub 拉取最新数据
+    // 3. GitHub API 兜底
     if (OWNER_CONFIG.storageMode === 'github') {
-      var ghData = await readCityQRFromGitHub();
-      if (ghData) {
-        if (localData && localData._updated > (ghData._updated || 0)) ghData = localData;
-        localStorage.setItem(CITY_KEY, JSON.stringify(ghData));
-        return ghData;
-      }
+      try {
+        var ghData = await readCityQRFromGitHub();
+        if (ghData) {
+          localStorage.setItem(CITY_KEY, JSON.stringify(ghData));
+          return ghData;
+        }
+      } catch(e) {}
     }
-    return localData;
+    return null;
   }
 
   // 写入各地州二维码数据
